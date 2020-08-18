@@ -102,7 +102,7 @@ public class SObject : MonoBehaviour
             
     }
 
-    protected void definePointsDestination()
+    public void definePointsDestination()
     {
         float left, up, right, down, height;
         left = transform.position.x - m_radius / Mathf.Sqrt(2);

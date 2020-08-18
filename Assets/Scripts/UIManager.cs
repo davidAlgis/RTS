@@ -10,10 +10,11 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private Canvas m_mainUICanvas;
 
-    GameObject[] m_creationButtonsGO = new GameObject[18];
-    Image[] m_creationButtonsImage = new Image[18];
-    GameObject m_queueButtonsPanel;
-    List<GameObject> m_creationQueueGO = new List<GameObject>();
+    private GameObject[] m_creationButtonsGO = new GameObject[18];
+    private Image[] m_creationButtonsImage = new Image[18];
+    private GameObject m_queueButtonsPanel;
+    private List<GameObject> m_creationQueueGO = new List<GameObject>();
+    private GameObject m_buildingCreated = null;
 
     [SerializeField]
     private RawImage m_selectionImage;
@@ -31,6 +32,8 @@ public class UIManager : MonoBehaviour
             return m_instance;
         }
     }
+
+    public GameObject BuildingCreated { get => m_buildingCreated; set => m_buildingCreated = value; }
 
     private void Awake()
     {
@@ -181,4 +184,24 @@ public class UIManager : MonoBehaviour
 
     }
 
+    public void createBuildingUI(GameObject buildingGO)
+    {
+
+
+    }
+
+    public void Update()
+    {
+        if (m_buildingCreated != null)
+        {
+            RaycastHit rayHit;
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out rayHit, Mathf.Infinity))
+            {
+                Vector3 point = rayHit.point;
+                m_buildingCreated.transform.position = new Vector3(point.x, m_buildingCreated.transform.position.y, point.z) ;
+            }
+               
+            
+        }
+    }
 }

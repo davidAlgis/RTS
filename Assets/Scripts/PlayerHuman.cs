@@ -13,8 +13,10 @@ public class PlayerHuman : Player
     private Vector3 m_extremityBoxSelection1;
     private Vector3 m_extremityBoxSelection2;
     private Vector3 m_extremitySelectionUI1;
+    private GameObject m_beginCreation = null;
 
     public bool MouseIsHold { get => m_mouseIsHold; set => m_mouseIsHold = value; }
+    public GameObject BeginCreation { get => m_beginCreation; set => m_beginCreation = value; }
     #endregion
 
     protected override void Awake()
@@ -42,14 +44,18 @@ public class PlayerHuman : Player
     // Update is called once per frame
     void Update()
     {
-        /*if (Input.GetKeyDown(KeyCode.F) == false)
-        {
-            cleanCurrentSelection();
-        }
-        else
-            print("press ctrl");*/
-        //mouse is click
 
+        if (m_beginCreation != null)
+        {
+            if (Input.GetMouseButton(0))
+            {
+                if (m_beginCreation.TryGetComponent(out SObject sobject))
+                    sobject.definePointsDestination();
+                UIManager.Instance.BuildingCreated = null;
+                m_beginCreation = null;
+            }
+            return;
+        }
 
         select();
         multiSelection();
