@@ -96,7 +96,6 @@ public class UIManager : MonoBehaviour
 
     public void setCreationButton(List<CreationImprovement> creationButtons, SBuilding sbuilding = null)
     {
-        print("set creation" + gameObject.name);
         if(creationButtons!= null)
         {
             int index = 0;
@@ -110,6 +109,8 @@ public class UIManager : MonoBehaviour
 
                 if (m_creationButtonsGO[index].TryGetComponent(out Button button))
                 {
+                    button.onClick.RemoveAllListeners();
+
                     if (sbuilding != null)
                         button.onClick.AddListener(() => sbuilding.addToQueue(creationButton));
                     else
@@ -136,7 +137,6 @@ public class UIManager : MonoBehaviour
             }
         }
     }
-   
 
     public void addQueueButton(CreationImprovement creationImprovement)
     {
@@ -153,11 +153,9 @@ public class UIManager : MonoBehaviour
     public void dequeueButton(int index)
     {
 
-        print("add dequeue button");
         GameObject go = m_creationQueueGO[index];
         m_creationQueueGO.RemoveAt(index);
         Destroy(go);
-        print("end add dequeue button");
     }
 
     public void setQueueButton(Queue<CreationImprovement> queueCreationImprovement)
@@ -182,4 +180,5 @@ public class UIManager : MonoBehaviour
         m_textRessources[3].text = "Rock : " + player.Rock.ToString();
 
     }
+
 }

@@ -14,7 +14,6 @@ public class SBuilding : SUnmovable
 
     public void addToQueue(CreationImprovement buttonImage)
     {
-        print("add to deque");
         m_queueCreation.Enqueue(buttonImage);
         UIManager.Instance.addQueueButton(buttonImage);
         if (m_creationOnGoing == false)
@@ -23,7 +22,6 @@ public class SBuilding : SUnmovable
 
     public void dequeue()
     {
-        print("dequeu");
         m_queueCreation.Dequeue();
         UIManager.Instance.dequeueButton(0);
     }

@@ -132,7 +132,7 @@ public class SObject : MonoBehaviour
 
     public virtual void onClick(RaycastHit rayHit)
     {
-        print("click for sobject");
+
     }
 
     public bool damage(uint damage)
@@ -152,7 +152,6 @@ public class SObject : MonoBehaviour
 
     public virtual void updateUI()
     {
-        print("update virtual ui");
         UIManager.Instance.setCreationButton(m_buttonCreation);
     }
 }
