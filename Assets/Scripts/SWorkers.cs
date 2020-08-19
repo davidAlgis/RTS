@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SHarvester : SUnit
+public class SWorkers : SUnit
 {
     //time for taking 10 unit;
     private float m_speedHarvest = 10.0f;
@@ -86,6 +86,12 @@ public class SHarvester : SUnit
 
     public void beginCreateBuilding(GameObject buildingGO)
     {
+        if (m_belongsTo is PlayerHuman)
+        {
+            PlayerHuman p = (PlayerHuman)m_belongsTo;
+            p.BeginCreation = buildingGO;
+        }
+
         SBuilding sbuilding;
         if (buildingGO.TryGetComponent(out sbuilding) == false)
         {
@@ -95,21 +101,26 @@ public class SHarvester : SUnit
 
         sbuilding.BelongsTo = GameManager.Instance.CurrentPlayer;
 
+        //define the position of the building
         RaycastHit rayHit;
         if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out rayHit, Mathf.Infinity))
-            UIManager.Instance.BuildingCreated = Instantiate(buildingGO, rayHit.point, Quaternion.identity);
-        
+        {
+            Vector3 origPos = rayHit.point;
+            UIManager.Instance.BuildingCreated = Instantiate(buildingGO, origPos, Quaternion.identity);
+
+            //translate the building above floor
+            if (UIManager.Instance.BuildingCreated.TryGetComponent(out Collider collider))
+            {
+                origPos = new Vector3(origPos.x, origPos.y + collider.bounds.extents.y, origPos.z);
+                UIManager.Instance.BuildingCreated.transform.position = origPos;
+            }
+            else
+                Debug.LogWarning("Unable to find any collider component on "+ UIManager.Instance.BuildingCreated.name + ". The building could be beneath floor");
+        }
+            
         
         if (UIManager.Instance.BuildingCreated.TryGetComponent(out Rigidbody rb))
             rb.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotation;
-
-
-        if (m_belongsTo is PlayerHuman)
-        {
-            PlayerHuman p = (PlayerHuman)m_belongsTo;
-            p.BeginCreation = buildingGO;
-        }
-
     }
 
 

@@ -6,17 +6,23 @@ using UnityEngine.UIElements;
 
 public class PlayerHuman : Player
 {
+    private GameObject m_beginCreation = null;
+
     private List<SObject> m_currentSelection = new List<SObject>();
+    private SObject m_lastSelection;
+    private bool m_enableSelection;
+
     #region multi-selection attributes
     private bool m_mouseIsHold;
     private BoxCollider m_boxForSelection;
     private Vector3 m_extremityBoxSelection1;
     private Vector3 m_extremityBoxSelection2;
     private Vector3 m_extremitySelectionUI1;
-    private GameObject m_beginCreation = null;
+    
 
     public bool MouseIsHold { get => m_mouseIsHold; set => m_mouseIsHold = value; }
     public GameObject BeginCreation { get => m_beginCreation; set => m_beginCreation = value; }
+    public bool EnableSelection { get => m_enableSelection; set => m_enableSelection = value; }
     #endregion
 
     protected override void Awake()
@@ -28,6 +34,7 @@ public class PlayerHuman : Player
          SObject in the box to the selection.
          The coordinate of the box collider will be updated in update loop when the player
          hold the mouse.*/
+        m_enableSelection = true;
         m_mouseIsHold = false;
         GameObject cubeForDetection = new GameObject();
         cubeForDetection.name = "BoxForMultiSelection";
@@ -44,6 +51,22 @@ public class PlayerHuman : Player
     // Update is called once per frame
     void Update()
     {
+        m_enableSelection = selectIsEnable();
+
+        if (m_enableSelection)
+        {
+            select();
+            multiSelection();
+
+            if (Input.GetMouseButtonDown(1))
+            {
+                RaycastHit rayHit;
+                if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out rayHit, Mathf.Infinity))
+                    actionCurrentSelection(rayHit);
+
+            }
+        }
+            
 
         if (m_beginCreation != null)
         {
@@ -53,24 +76,26 @@ public class PlayerHuman : Player
                     sobject.definePointsDestination();
                 UIManager.Instance.BuildingCreated = null;
                 m_beginCreation = null;
+                m_enableSelection = true;
             }
-            return;
         }
 
-        select();
-        multiSelection();
-
-        
-        if (Input.GetMouseButtonDown(1))
-        {
-            RaycastHit rayHit;
-            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out rayHit, Mathf.Infinity))
-                actionCurrentSelection(rayHit);
-
-        }
     }
 
     #region selection_tool
+
+    private bool selectIsEnable()
+    {
+
+        if (m_beginCreation != null)
+            return false;
+        if (UIManager.Instance.IsPointerOverUIElement())
+            return false;
+
+        return true; 
+    }
+
+
     private void select()
     {
         if (Input.GetMouseButtonDown(0))
@@ -86,10 +111,10 @@ public class PlayerHuman : Player
 
     private void multiSelection()
     {
-        //mouse is held down first
-        if (Input.GetMouseButton(0) && m_mouseIsHold == false)
-        {
 
+        //mouse is held down first
+        if (Input.GetMouseButton(0) && m_mouseIsHold == false && Input.GetMouseButtonDown(0))
+        {
             m_mouseIsHold = true;
             m_extremitySelectionUI1 = UIManager.Instance.convertMousePositionToCanvasPosition(Input.mousePosition);
             RaycastHit rayHit;
@@ -113,6 +138,7 @@ public class PlayerHuman : Player
             RaycastHit rayHit;
             if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out rayHit, Mathf.Infinity))
             {
+                m_boxForSelection.enabled = true;
                 Vector3 point = rayHit.point;
                 m_extremityBoxSelection2 = new Vector3(point.x, point.y + 10.0f, point.z);
                 Vector3 center, size;
@@ -144,6 +170,8 @@ public class PlayerHuman : Player
                 //reset the box collider
                 m_boxForSelection.center = Vector3.zero;
                 m_boxForSelection.size = Vector3.zero;
+                m_boxForSelection.enabled = false;
+                
             }
         }
     }

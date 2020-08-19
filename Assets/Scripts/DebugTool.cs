@@ -45,10 +45,5 @@ public static class DebugTool
         }
         return true;
     }
-
-    public static void addGizmosText(Vector3 positionToAdd, string textToAdd)
-    {
-        
-    }
 }
 

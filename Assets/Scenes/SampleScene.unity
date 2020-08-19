@@ -5393,6 +5393,7 @@ MonoBehaviour:
   m_rock: 0
   m_gold: 0
   m_food: 0
+  m_enableSelection: 1
 --- !u!1 &1823005986
 GameObject:
   m_ObjectHideFlags: 0
@@ -6318,7 +6319,7 @@ PrefabInstance:
     - target: {fileID: 304778352091325262, guid: 378f8697df5d83a4da69aa133da127ae,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -2.16
+      value: -1.84
       objectReference: {fileID: 0}
     - target: {fileID: 304778352091325262, guid: 378f8697df5d83a4da69aa133da127ae,
         type: 3}
@@ -6374,6 +6375,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: House
+      objectReference: {fileID: 0}
+    - target: {fileID: 304778352091325267, guid: 378f8697df5d83a4da69aa133da127ae,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 4294967295
+      objectReference: {fileID: 0}
+    - target: {fileID: 397016216566240912, guid: 378f8697df5d83a4da69aa133da127ae,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 4294967295
       objectReference: {fileID: 0}
     - target: {fileID: 4452060689855649944, guid: 378f8697df5d83a4da69aa133da127ae,
         type: 3}

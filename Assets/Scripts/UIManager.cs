@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
@@ -184,10 +185,15 @@ public class UIManager : MonoBehaviour
 
     }
 
-    public void createBuildingUI(GameObject buildingGO)
+
+
+    public bool IsPointerOverUIElement()
     {
-
-
+        var eventData = new PointerEventData(EventSystem.current);
+        eventData.position = Input.mousePosition;
+        var results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, results);
+        return results.Count > 0;
     }
 
     public void Update()
@@ -200,8 +206,8 @@ public class UIManager : MonoBehaviour
                 Vector3 point = rayHit.point;
                 m_buildingCreated.transform.position = new Vector3(point.x, m_buildingCreated.transform.position.y, point.z) ;
             }
-               
-            
+
         }
+
     }
 }

@@ -40,7 +40,7 @@ public class SObject : MonoBehaviour
     protected virtual void Awake()
     {
         if (checkCoherency() == false)
-            Debug.LogWarning(m_ID + " isn't coherent");
+            Debug.LogWarning(gameObject.name + " isn't coherent");
 
         updateNbrOfSobject();
         defineID();
@@ -122,7 +122,6 @@ public class SObject : MonoBehaviour
     {
         //add cursor on above the selectedObject        
         m_cursorGO.SetActive(true);
-
     }
 
     public void unSelect()
