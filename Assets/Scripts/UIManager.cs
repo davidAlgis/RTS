@@ -36,6 +36,7 @@ public class UIManager : MonoBehaviour
 
     public GameObject BuildingCreated { get => m_buildingCreated; set => m_buildingCreated = value; }
 
+
     private void Awake()
     {
         if (m_mainUICanvas == null)
@@ -98,7 +99,7 @@ public class UIManager : MonoBehaviour
         return pos;
     }
 
-    public void setCreationButton(List<CreationImprovement> creationButtons, SBuilding sbuilding = null)
+    public void setCreationButton(SObject sobject, List<CreationImprovement> creationButtons, bool isInteractable = true)
     {
         if(creationButtons!= null)
         {
@@ -115,12 +116,19 @@ public class UIManager : MonoBehaviour
                 {
                     button.onClick.RemoveAllListeners();
 
-                    if (sbuilding != null)
+                    if (sobject is SBuilding)
+                    {
+                        SBuilding sbuilding = (SBuilding)sobject;
                         button.onClick.AddListener(() => sbuilding.addToQueue(creationButton));
+                    }
                     else
                         button.onClick.AddListener(() => creationButton.method?.Invoke());
 
-                    button.interactable = true;
+                    //if he click on button we must send the informations of the buttons to the sobject
+                    button.onClick.AddListener(() => sobject.setCurrentButtonCreation(creationButton));
+
+                    
+                    button.interactable = isInteractable;
                 }
 
 
@@ -137,8 +145,26 @@ public class UIManager : MonoBehaviour
                 m_creationButtonsImage[i].enabled = false;
 
                 if (m_creationButtonsGO[i].TryGetComponent(out Button button))
+                {
+                    button.onClick.RemoveAllListeners();
                     button.interactable = false;
+                }
+                    
             }
+        }
+    }
+
+    public void setDefaultCreationButton()
+    {
+        for (int i = 0; i < 18; i++)
+        {
+            if (m_creationButtonsGO[i].TryGetComponent(out Button button))
+            {
+                button.onClick.RemoveAllListeners();
+                button.interactable = false;
+            }
+
+            m_creationButtonsImage[i].enabled = false;
         }
     }
 
@@ -185,8 +211,6 @@ public class UIManager : MonoBehaviour
 
     }
 
-
-
     public bool IsPointerOverUIElement()
     {
         var eventData = new PointerEventData(EventSystem.current);
@@ -200,8 +224,9 @@ public class UIManager : MonoBehaviour
     {
         if (m_buildingCreated != null)
         {
+            LayerMask mask = LayerMask.GetMask("Floor");
             RaycastHit rayHit;
-            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out rayHit, Mathf.Infinity))
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out rayHit, Mathf.Infinity, mask))
             {
                 Vector3 point = rayHit.point;
                 m_buildingCreated.transform.position = new Vector3(point.x, m_buildingCreated.transform.position.y, point.z) ;

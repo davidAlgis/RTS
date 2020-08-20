@@ -18,8 +18,9 @@ public class PlayerHuman : Player
     private Vector3 m_extremityBoxSelection1;
     private Vector3 m_extremityBoxSelection2;
     private Vector3 m_extremitySelectionUI1;
-    
+    #endregion
 
+    #region getter
     public bool MouseIsHold { get => m_mouseIsHold; set => m_mouseIsHold = value; }
     public GameObject BeginCreation { get => m_beginCreation; set => m_beginCreation = value; }
     public bool EnableSelection { get => m_enableSelection; set => m_enableSelection = value; }
@@ -47,8 +48,6 @@ public class PlayerHuman : Player
         #endregion
     }
 
-
-    // Update is called once per frame
     void Update()
     {
         m_enableSelection = selectIsEnable();
@@ -72,11 +71,19 @@ public class PlayerHuman : Player
         {
             if (Input.GetMouseButton(0))
             {
-                if (m_beginCreation.TryGetComponent(out SObject sobject))
+                /*this line must be before the next one, indeed if we call constructBuilding() 
+                 * it will try to reach the destinationPoints which are set to 0 without this line*/
+                if (UIManager.Instance.BuildingCreated.TryGetComponent(out SObject sobject))
                     sobject.definePointsDestination();
+
+                //TODO : change the 0 index for m_currentSelection
+                if (m_currentSelection != null)
+                    if (m_currentSelection[0].TryGetComponent(out SWorkers sworkers))
+                        sworkers.beginConstructBuilding(UIManager.Instance.BuildingCreated);
+
                 UIManager.Instance.BuildingCreated = null;
                 m_beginCreation = null;
-                m_enableSelection = true;
+                //m_enableSelection = true;
             }
         }
 

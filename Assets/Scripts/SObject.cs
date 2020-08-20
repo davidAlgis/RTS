@@ -24,7 +24,7 @@ public class SObject : MonoBehaviour
     protected uint m_nbrUnitOnObject = 0;
     [SerializeField]
     protected List<CreationImprovement> m_buttonCreation = new List<CreationImprovement>();
-    //public UnityAction method;
+    protected CreationImprovement m_currentButtonCreation;
     [SerializeField]
     private uint m_health = 100;
 
@@ -35,6 +35,7 @@ public class SObject : MonoBehaviour
     public string ID { get => m_ID; set => m_ID = value; }
     public uint Health { get => m_health; }
     #endregion
+
 
 
     protected virtual void Awake()
@@ -52,6 +53,11 @@ public class SObject : MonoBehaviour
 
         m_cursorGO.SetActive(false);
         definePointsDestination();
+    }
+
+    public void setCurrentButtonCreation(CreationImprovement creationImprovement)
+    {
+        m_currentButtonCreation = creationImprovement;
     }
 
     private uint updateNbrOfSobject()
@@ -149,9 +155,12 @@ public class SObject : MonoBehaviour
             
     }
 
-    public virtual void updateUI()
+    public virtual void updateUI(bool isInteractable = true)
     {
-        UIManager.Instance.setCreationButton(m_buttonCreation);
+        if(isInteractable)
+            UIManager.Instance.setCreationButton(this, m_buttonCreation);
+        else
+            UIManager.Instance.setCreationButton(this, m_buttonCreation, false);
     }
 }
 

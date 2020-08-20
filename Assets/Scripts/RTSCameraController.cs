@@ -33,7 +33,6 @@ public class RTSCameraController : MonoBehaviour
     private Vector3 panMovement;
     private Vector3 pos;
     private Quaternion rot;
-    private bool rotationActive = false;
     private Vector3 lastMousePosition;
     private Quaternion initialRot;
     private float panIncrease = 0.0f;
@@ -130,7 +129,7 @@ public class RTSCameraController : MonoBehaviour
         #endregion
 
         #region mouse rotation
-
+        /*
         if (rotationEnabled)
         {
             // Mouse Rotation
@@ -167,9 +166,9 @@ public class RTSCameraController : MonoBehaviour
             lastMousePosition = Input.mousePosition;
 
         }
+        */
 
-
-        #endregion
+        #endregion 
 
         #region boundaries
 
