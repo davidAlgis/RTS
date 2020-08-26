@@ -130,7 +130,8 @@ MonoBehaviour:
   m_nbrUnitMaxOnObject: 4
   m_buttonCreation:
   - spriteButton: {fileID: 21300000, guid: f613bd9799d84694a871bbac0cfa213e, type: 3}
-    duration: 3
+    sobject: {fileID: 3422678436820911440, guid: b3d52c0c6ab6e4645ae995471746475b,
+      type: 3}
     method:
       m_PersistentCalls:
         m_Calls:
@@ -147,10 +148,12 @@ MonoBehaviour:
             m_BoolArgument: 0
           m_CallState: 2
   m_health: 100
+  m_durationCreation: 60
   m_stepConstructionMesh:
   - {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
   - {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
   - {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+  m_isInConstruction: 0
   m_stateOfConstruction: 0
 --- !u!1001 &304778350906035782
 PrefabInstance:

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using UnityEngine;
 using UnityEngine.AI;
@@ -39,12 +40,18 @@ public class SMovable : SObject
         {
             //we update the destination to the nearer destination points.
             if (sobject.PointsDestinationNavMesh != null)
-                foreach (Vector3 point in sobject.PointsDestinationNavMesh)
-                    if (Vector3.Distance(transform.position, dest) > Vector3.Distance(transform.position, point))
+                for(int i=0; i<sobject.PointsDestinationNavMesh.Count; i++)
+                {
+                    Vector3 point = sobject.PointsDestinationNavMesh[i].first;
+                    if (Vector3.Distance(transform.position, dest) > Vector3.Distance(transform.position, point) && sobject.PointsDestinationNavMesh[i].second == false)
+                    {
                         dest = point;
+                        sobject.PointsDestinationNavMesh[i].second = true;
+                    }
+                }
             //TODO: case with animals which are neutral but can be attacked
             //if the sobject belongs to ennemy we attack it
-            if(sobject.BelongsTo is PlayerEnnemy)
+            if (sobject.BelongsTo is PlayerEnnemy)
             {
                 StartCoroutine(actionAttack(sobject));
                 //if it's an ennemy that can move we follow him 
@@ -61,9 +68,15 @@ public class SMovable : SObject
         while (target.Health > 0)
         {
             Vector3 dest = transform.position;
-            foreach (Vector3 point in target.PointsDestinationNavMesh)
-                if (Vector3.Distance(transform.position, target.transform.position) > Vector3.Distance(transform.position, point))
+            for (int i = 0; i < target.PointsDestinationNavMesh.Count; i++)
+            {
+                Vector3 point = target.PointsDestinationNavMesh[i].first;
+                if (Vector3.Distance(transform.position, dest) > Vector3.Distance(transform.position, point) && target.PointsDestinationNavMesh[i].second == false)
+                {
+                    target.PointsDestinationNavMesh[i].second = true;
                     dest = point;
+                }
+            }
 
             if (m_distanceMaxAttack > Vector3.Distance(transform.position, dest))
                 if (target.damage(m_powerAttack))
@@ -76,7 +89,6 @@ public class SMovable : SObject
 
         }
     }
-
 
 
     protected IEnumerator followSObject(SMovable target)
@@ -105,10 +117,13 @@ public class SMovable : SObject
                 Agent.destination = dest;
                 yield break;
             }
-            
-            foreach (Vector3 point in target.PointsDestinationNavMesh)
-                if (Vector3.Distance(transform.position, target.transform.position) > Vector3.Distance(transform.position, point))
+
+            for (int j = 0; j < target.PointsDestinationNavMesh.Count; j++)
+            {
+                Vector3 point = target.PointsDestinationNavMesh[j].first;
+                if (Vector3.Distance(transform.position, dest) > Vector3.Distance(transform.position, point))
                     dest = point;
+            }
 
             Agent.destination = dest;
 

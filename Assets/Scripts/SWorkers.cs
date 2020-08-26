@@ -37,13 +37,12 @@ public class SWorkers : SUnit
 
             }
             else
+            {
                 //if the building is in construction we continue the construction
                 if (sbuilding.IsInConstruction)
                     continueConstructBuilding(sbuilding.gameObject);
-
-        
+            }
         }
-
     }
 
     IEnumerator actionGetRessourcesCoroutine(SRessources sressources)
@@ -147,7 +146,7 @@ public class SWorkers : SUnit
     {
         StopAllCoroutines();
         buildingGO.isStatic = true;
-
+        buildingGO.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
         Vector3 dest = buildingGO.transform.position;
         if (buildingGO.TryGetComponent(out SBuilding sbuilding))
         {
@@ -159,9 +158,16 @@ public class SWorkers : SUnit
 
             //we update the destination to the nearer destination points.
             if (sbuilding.PointsDestinationNavMesh != null)
-                foreach (Vector3 point in sbuilding.PointsDestinationNavMesh)
-                    if (Vector3.Distance(transform.position, dest) > Vector3.Distance(transform.position, point))
+                for (int i = 0; i < sbuilding.PointsDestinationNavMesh.Count; i++)
+                {
+                    Vector3 point = sbuilding.PointsDestinationNavMesh[i].first;
+                    if (Vector3.Distance(transform.position, dest) > Vector3.Distance(transform.position, point) && sbuilding.PointsDestinationNavMesh[i].second == false)
+                    {
                         dest = point;
+                        sbuilding.PointsDestinationNavMesh[i].second = true;
+                    }
+                     
+                }
         }
         //move to the building
         Agent.destination = dest;
@@ -176,9 +182,15 @@ public class SWorkers : SUnit
         {
             //we update the destination to the nearer destination points.
             if (sbuilding.PointsDestinationNavMesh != null)
-                foreach (Vector3 point in sbuilding.PointsDestinationNavMesh)
-                    if (Vector3.Distance(transform.position, dest) > Vector3.Distance(transform.position, point))
+                for (int i = 0; i < sbuilding.PointsDestinationNavMesh.Count; i++)
+                {
+                    Vector3 point = sbuilding.PointsDestinationNavMesh[i].first;
+                    if (Vector3.Distance(transform.position, dest) > Vector3.Distance(transform.position, point) && sbuilding.PointsDestinationNavMesh[i].second == false)
+                    {
+                        sbuilding.PointsDestinationNavMesh[i].second = true;
                         dest = point;
+                    }
+                }
         }
         //move to the building
         Agent.destination = dest;
@@ -189,13 +201,7 @@ public class SWorkers : SUnit
     IEnumerator constructBuildingCoroutine(GameObject buildingGO)
     {
         #region constructBuildingInit
-        //check if the current Butten Creation is invalid
-        if (m_currentButtonCreation.method == null)
-        {
-            Debug.LogWarning("The button creation of " + gameObject.name + "has not been properly set");
-            yield break;
-        }
-
+        
         SBuilding sbuilging;
         if (buildingGO.TryGetComponent(out sbuilging) == false)
         {
@@ -204,7 +210,7 @@ public class SWorkers : SUnit
         }
 
         int nbrOfStepOfConstruction = sbuilging.StepConstructionMesh.Length;
-        float duration = m_currentButtonCreation.duration;
+        float duration = sbuilging.DurationCreation;
         Mesh[] stepConstruction = sbuilging.StepConstructionMesh;
 
         //we change the mesh to the first step of construction if it's the first workers on construction
@@ -266,30 +272,12 @@ public class SWorkers : SUnit
                 buildingGO.GetComponent<MeshFilter>().sharedMesh = mesh;
                 sbuilging.IndexOfConstructionMesh++; 
             }
-            
+            print(gameObject.name + "is building");
             sbuilging.StateOfConstruction += (timeIteration / duration)* m_speedConstruction;
             yield return new WaitForSeconds(timeIteration);
         }
 
-        //yield return new WaitForSeconds(durationOfStep * m_speedConstruction);
-        
-        /*
-        //divide construction on the number of stepOfConstruction
-        for (int index=1; index<nbrOfStepOfConstruction;index++)
-        {
-            
-            Mesh mesh = stepConstruction[index];
-            if(mesh == null)
-            {
-                Debug.LogWarning("The mesh component of " + gameObject.name + " as not been set");
-                yield return new WaitForSeconds(durationOfStep);
-                break;
-            }
-            //change the mesh to the next step
-            buildingGO.GetComponent<MeshFilter>().sharedMesh = mesh;
 
-            yield return new WaitForSeconds(durationOfStep * m_speedConstruction);
-        }*/
         //change mesh to the full form off the building
         buildingGO.GetComponent<MeshFilter>().sharedMesh = sbuilging.InitMeshBuilding;
         sbuilging.enabled = true;

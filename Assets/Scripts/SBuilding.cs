@@ -54,7 +54,6 @@ public class SBuilding : SUnmovable
         m_initMeshBuilding = meshFilterInit.mesh;
     }
 
-
     public void addToQueue(CreationImprovement buttonImage)
     {
         m_queueCreation.Enqueue(buttonImage);
@@ -79,7 +78,7 @@ public class SBuilding : SUnmovable
         }
 
         sunit.BelongsTo = GameManager.Instance.CurrentPlayer;
-        Instantiate(sunitGO, PointsDestinationNavMesh[3], Quaternion.identity);
+        Instantiate(sunitGO, PointsDestinationNavMesh[3].first, Quaternion.identity);
     }
 
     IEnumerator treatQueue()
@@ -87,7 +86,7 @@ public class SBuilding : SUnmovable
         m_creationOnGoing = true;
         while (m_queueCreation.Count > 0)
         {
-            yield return new WaitForSeconds(m_queueCreation.Peek().duration);
+            yield return new WaitForSeconds(m_queueCreation.Peek().sobject.DurationCreation);
             m_queueCreation.Peek().method.Invoke();
             dequeue();
         }

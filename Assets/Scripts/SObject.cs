@@ -18,7 +18,7 @@ public class SObject : MonoBehaviour
     To avoid agent which cannot reach is destination*/
     [SerializeField]
     protected float m_radius = 0f;
-    private Vector3[] m_pointsDestinationNavMesh = new Vector3[4];
+    private List<Pair<Vector3, bool>> m_pointsDestionationNavMesh = new List<Pair<Vector3, bool>>();
     [SerializeField]
     protected uint m_nbrUnitMaxOnObject = 4;
     protected uint m_nbrUnitOnObject = 0;
@@ -27,13 +27,16 @@ public class SObject : MonoBehaviour
     protected CreationImprovement m_currentButtonCreation;
     [SerializeField]
     private uint m_health = 100;
+    [SerializeField]
+    private float m_durationCreation = 0.0f;
 
     #region getter
     public Player BelongsTo { get => m_belongsTo; set => m_belongsTo = value; }
-    public Vector3[] PointsDestinationNavMesh { get => m_pointsDestinationNavMesh; set => m_pointsDestinationNavMesh = value; }
+    public List<Pair<Vector3, bool>> PointsDestinationNavMesh { get => m_pointsDestionationNavMesh; set => m_pointsDestionationNavMesh = value; }
     public bool IsNeutral { get => m_isNeutral; set => m_isNeutral = value; }
     public string ID { get => m_ID; set => m_ID = value; }
     public uint Health { get => m_health; }
+    public float DurationCreation { get => m_durationCreation; set => m_durationCreation = value; }
     #endregion
 
 
@@ -117,11 +120,24 @@ public class SObject : MonoBehaviour
         down = transform.position.z - m_radius / Mathf.Sqrt(2);
         height = transform.position.y;
 
+        m_pointsDestionationNavMesh.Add(new Pair<Vector3, bool>(new Vector3(left, height, up), false));
+        m_pointsDestionationNavMesh.Add(new Pair<Vector3, bool>(new Vector3(left, height, down), false));
+        m_pointsDestionationNavMesh.Add(new Pair<Vector3, bool>(new Vector3(right, height, up), false));
+        m_pointsDestionationNavMesh.Add(new Pair<Vector3, bool>(new Vector3(right, height, down), false));
+        
+        if(m_radius > 2.0f)
+        {
+            m_pointsDestionationNavMesh.Add(new Pair<Vector3, bool>(new Vector3(transform.position.x, height, up), false));
+            m_pointsDestionationNavMesh.Add(new Pair<Vector3, bool>(new Vector3(transform.position.x, height, down), false));
+            m_pointsDestionationNavMesh.Add(new Pair<Vector3, bool>(new Vector3(left, height, transform.position.z), false));
+            m_pointsDestionationNavMesh.Add(new Pair<Vector3, bool>(new Vector3(right, height, transform.position.z), false));
+        }
+        /*
         m_pointsDestinationNavMesh[0] = new Vector3(left, height, up);
         m_pointsDestinationNavMesh[1] = new Vector3(left, height, down);
         m_pointsDestinationNavMesh[2] = new Vector3(right, height, up);
         m_pointsDestinationNavMesh[3] = new Vector3(right, height, down);
-
+        */
     }
 
     public void isSelect()
@@ -175,7 +191,8 @@ public enum Agent
 public struct CreationImprovement
 {
     public Sprite spriteButton;
-    public float duration;
+    //public float duration;
+    public SObject sobject;
     //the methods used here can only have less than 2 parameters.
     public UnityEvent method;
 
