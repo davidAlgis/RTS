@@ -11,16 +11,19 @@ public class AddToSelection : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.gameObject.TryGetComponent(out SObject selectableObject))
+        if(other.gameObject.layer == LayerMask.NameToLayer("Selectable"))
+            if (other.transform.parent.gameObject.TryGetComponent(out SObject selectableObject))
                 m_player.addToCurrentSelection(selectableObject);
+
     }
 
     private void OnTriggerExit(Collider other)
     {
         if(m_player.MouseIsHold)
         {
-            if (other.gameObject.TryGetComponent(out SObject selectableObject))
-                m_player.removeFromCurrentSelection(selectableObject);
+            if (other.gameObject.layer == LayerMask.NameToLayer("Selectable"))
+                if (other.transform.parent.gameObject.TryGetComponent(out SObject selectableObject))
+                    m_player.removeFromCurrentSelection(selectableObject);
         }
     }
 }

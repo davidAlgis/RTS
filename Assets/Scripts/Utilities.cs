@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -75,7 +77,40 @@ public class Utilities : MonoBehaviour
         return false;
     }
 
+    public static void drawSquareContour(LineRenderer lineRenderer, Vector3 pos, float radius, float width = 0.1f)
+    {
+        lineRenderer.startWidth = width;
+        lineRenderer.endWidth = width;
+        lineRenderer.loop = true;
+        lineRenderer.positionCount = 4;
+        float left, up, right, down, height;
+        left = - radius / Mathf.Sqrt(2);
+        right = radius / Mathf.Sqrt(2);
+        up =  radius / Mathf.Sqrt(2);
+        down = - radius / Mathf.Sqrt(2);
+        height =  0.75f - pos.y;
+        Vector3[] vertexPositions = new Vector3[4] { new Vector3(left, height, up), new Vector3(left, height, down), new Vector3(right, height, down), new Vector3(right, height, up) };
+        lineRenderer.SetPositions(vertexPositions);
+    }
 
+    public static void drawCircleContour(LineRenderer lineRenderer, Vector3 pos, float radius, float width = 0.1f)
+    {
+        lineRenderer.startWidth = width;
+        lineRenderer.endWidth = width;
+        lineRenderer.loop = true;
+        lineRenderer.positionCount = 4;
+        float height;
+        height = 0.75f - pos.y;
+        int nbrOfPointInCircle = 10;
+        Vector3[] vertexPositions = new Vector3[nbrOfPointInCircle];
+        //{ new Vector3(left, height, up), new Vector3(left, height, down), new Vector3(right, height, down), new Vector3(right, height, up) };
+        int index = 0;
+        for(float coef = 0.0f; index < 2 * Mathf.PI; coef += Mathf.PI/ nbrOfPointInCircle)
+        {
+            vertexPositions[index] = new Vector3(radius * Mathf.Cos(coef), height, radius * Mathf.Sin(coef));
+        }
+        lineRenderer.SetPositions(vertexPositions);
+    }
 }
 
 

@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UIElements;
 
 public class SObject : MonoBehaviour
 {
     private GameObject m_cursorGO;
     private Renderer m_cursorRenderer;
+    private LineRenderer m_lineRenderer;
     [SerializeField]
     protected Player m_belongsTo;
     protected string m_name;
@@ -19,6 +21,8 @@ public class SObject : MonoBehaviour
     [SerializeField]
     protected float m_radius = 0f;
     private List<Pair<Vector3, bool>> m_pointsDestionationNavMesh = new List<Pair<Vector3, bool>>();
+    [SerializeField]
+    private FieldSelection m_fieldType;
     [SerializeField]
     protected uint m_nbrUnitMaxOnObject = 4;
     protected uint m_nbrUnitOnObject = 0;
@@ -46,16 +50,70 @@ public class SObject : MonoBehaviour
         if (checkCoherency() == false)
             Debug.LogWarning(gameObject.name + " isn't coherent");
 
+        definePointsDestination();
+        
         updateNbrOfSobject();
         defineID();
+
         if (DebugTool.tryFindGOChildren(gameObject, "Cursor", out m_cursorGO, LogType.Error) == false)
             return;
 
         if (m_cursorGO.TryGetComponent(out m_cursorRenderer) == false)
             Debug.LogWarning("Unable to find any renderer component on cursor of " + gameObject.name);
-
         m_cursorGO.SetActive(false);
-        definePointsDestination();
+    }
+
+    public void Start()
+    {
+        /*this function has to be executed in start, because 
+         * it have to wait the load ressources of UIManager in his awake*/
+        defineSelectionField(); 
+    }
+
+    public void defineSelectionField()
+    {
+        if(UIManager.Instance.DefaultLineRendererGO == null)
+        {
+            Debug.LogWarning("Unable to instantiate UIManager.Instance.DefaultLineRendererGO in " + gameObject.name);
+            return; 
+        }
+
+        GameObject selectionFieldGO = Instantiate(UIManager.Instance.DefaultLineRendererGO);
+        //selectionFieldGO.transform.position = Vector3.zero;
+        selectionFieldGO.transform.position = transform.position;// new Vector3(transform.position.x, 0.1f, transform.position.z);// new Vector3(0.0f , 0.2f, 0.0f);
+
+        selectionFieldGO.transform.parent = gameObject.transform;
+        selectionFieldGO.name = gameObject.name + "SelectionField";
+
+        selectionFieldGO.layer = 9;//GameManager.Instance.LayerSelection;
+        if (selectionFieldGO.TryGetComponent(out m_lineRenderer) == false)
+        {
+            Debug.LogWarning("Unable to find the lineRenderer component " + selectionFieldGO.name);
+            return;
+        }
+
+        
+        switch (m_fieldType)
+        {
+            case FieldSelection.circle:
+                Utilities.drawCircleContour(m_lineRenderer, transform.position, m_radius);
+                CapsuleCollider capsuleCollider = selectionFieldGO.AddComponent<CapsuleCollider>();
+                capsuleCollider.isTrigger = true;
+                capsuleCollider.radius = m_radius;
+                break;
+            case FieldSelection.square:
+
+                Utilities.drawSquareContour(m_lineRenderer, transform.position, m_radius);
+                BoxCollider boxCollider = selectionFieldGO.AddComponent<BoxCollider>();
+                boxCollider.isTrigger = true;
+                float sizeRadius = m_radius * Mathf.Sqrt(2.0f);
+                boxCollider.size = new Vector3(sizeRadius, sizeRadius, sizeRadius);
+                break;
+            default:
+                Debug.LogError("Unknown field type for " + gameObject.name);
+                break;
+        }
+        m_lineRenderer.enabled = false;
     }
 
     public void setCurrentButtonCreation(CreationImprovement creationImprovement)
@@ -99,6 +157,9 @@ public class SObject : MonoBehaviour
 
     public void setColorCursor(Color color)
     {
+        print("change line color");
+        m_lineRenderer.startColor = color;
+        m_lineRenderer.endColor = color;
         m_cursorRenderer.material.SetColor("_Color", color);
     }
 
@@ -142,12 +203,14 @@ public class SObject : MonoBehaviour
 
     public void isSelect()
     {
-        //add cursor on above the selectedObject        
+        //add cursor on above the selectedObject      
+        m_lineRenderer.enabled = true;
         m_cursorGO.SetActive(true);
     }
 
     public void unSelect()
     {
+        m_lineRenderer.enabled = false;
         m_cursorGO.SetActive(false);
     }
 
@@ -178,6 +241,12 @@ public class SObject : MonoBehaviour
         else
             UIManager.Instance.setCreationButton(this, m_buttonCreation, false);
     }
+}
+
+public enum FieldSelection
+{
+    square, 
+    circle
 }
 
 public enum Agent

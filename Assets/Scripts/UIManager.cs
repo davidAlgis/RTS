@@ -16,7 +16,7 @@ public class UIManager : MonoBehaviour
     private GameObject m_queueButtonsPanel;
     private List<GameObject> m_creationQueueGO = new List<GameObject>();
     private GameObject m_buildingCreated = null;
-
+    private GameObject m_defaultLineRendererGO;
     [SerializeField]
     private RawImage m_selectionImage;
 
@@ -35,7 +35,7 @@ public class UIManager : MonoBehaviour
     }
 
     public GameObject BuildingCreated { get => m_buildingCreated; set => m_buildingCreated = value; }
-
+    public GameObject DefaultLineRendererGO { get => m_defaultLineRendererGO; set => m_defaultLineRendererGO = value; }
 
     private void Awake()
     {
@@ -75,7 +75,10 @@ public class UIManager : MonoBehaviour
 
         DebugTool.tryFindGOChildren(m_mainUICanvas.gameObject, "Panel/CreationQueueButton", out m_queueButtonsPanel);
 
+        m_defaultLineRendererGO = Resources.Load("DefaultLineRenderer", typeof(GameObject)) as GameObject;
 
+        if (m_defaultLineRendererGO == null)
+            Debug.LogWarning("Unable to load the DefaultLineRenderer");
     }
 
     public void plotSelector(Vector3 extremity1, Vector3 extremity2)

@@ -11,6 +11,7 @@ public class PlayerHuman : Player
     private List<SObject> m_currentSelection = new List<SObject>();
     private SObject m_lastSelection;
     private bool m_enableSelection;
+    private LayerMask m_layerMaskFloor;
 
     #region multi-selection attributes
     private bool m_mouseIsHold;
@@ -46,6 +47,8 @@ public class PlayerHuman : Player
         Rigidbody rb = cubeForDetection.AddComponent<Rigidbody>();
         rb.useGravity = false;
         #endregion
+
+        m_layerMaskFloor = LayerMask.GetMask("Floor");
     }
 
     void Update()
@@ -109,7 +112,7 @@ public class PlayerHuman : Player
         {
             cleanCurrentSelection();
             RaycastHit rayHit;
-            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out rayHit, Mathf.Infinity))
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out rayHit, Mathf.Infinity, GameManager.Instance.LayerSelection))
                 if (rayHit.collider.TryGetComponent(out SObject selectableObject)) 
                     addToCurrentSelection(selectableObject);
 
@@ -118,14 +121,13 @@ public class PlayerHuman : Player
 
     private void multiSelection()
     {
-
         //mouse is held down first
         if (Input.GetMouseButton(0) && m_mouseIsHold == false && Input.GetMouseButtonDown(0))
         {
             m_mouseIsHold = true;
             m_extremitySelectionUI1 = UIManager.Instance.convertMousePositionToCanvasPosition(Input.mousePosition);
             RaycastHit rayHit;
-            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out rayHit, Mathf.Infinity))
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out rayHit, Mathf.Infinity, m_layerMaskFloor))
             {
                 Vector3 point = rayHit.point;
                 m_extremityBoxSelection1 = new Vector3(point.x, point.y - 10.0f, point.z);
@@ -136,6 +138,7 @@ public class PlayerHuman : Player
                 m_boxForSelection.size = size;
             }
         }
+        
 
         //mouse is held down
         if (Input.GetMouseButton(0) && m_mouseIsHold)
@@ -143,7 +146,7 @@ public class PlayerHuman : Player
             UIManager.Instance.plotSelector(m_extremitySelectionUI1, UIManager.Instance.convertMousePositionToCanvasPosition(Input.mousePosition));
 
             RaycastHit rayHit;
-            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out rayHit, Mathf.Infinity))
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out rayHit, Mathf.Infinity, m_layerMaskFloor))
             {
                 m_boxForSelection.enabled = true;
                 Vector3 point = rayHit.point;
@@ -163,7 +166,7 @@ public class PlayerHuman : Player
             UIManager.Instance.unPlotSelector();
 
             RaycastHit rayHit;
-            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out rayHit, Mathf.Infinity))
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out rayHit, Mathf.Infinity, m_layerMaskFloor))
             {
                 Vector3 point = rayHit.point;
 
