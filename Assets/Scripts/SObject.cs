@@ -41,6 +41,7 @@ public class SObject : MonoBehaviour
     public string ID { get => m_ID; set => m_ID = value; }
     public uint Health { get => m_health; }
     public float DurationCreation { get => m_durationCreation; set => m_durationCreation = value; }
+    public float Radius { get => m_radius; set => m_radius = value; }
     #endregion
 
 

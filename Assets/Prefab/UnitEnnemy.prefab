@@ -133,10 +133,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_belongsTo: {fileID: 0}
   m_isNeutral: 0
-  m_radius: 0
+  m_radius: 1.5
+  m_fieldType: 1
   m_nbrUnitMaxOnObject: 4
   m_buttonCreation: []
   m_health: 100
+  m_durationCreation: 0
   m_speedAttack: 0
   m_powerAttack: 0
   m_distanceMaxAttack: 0

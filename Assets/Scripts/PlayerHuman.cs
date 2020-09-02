@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 public class PlayerHuman : Player
 {
     private GameObject m_beginCreation = null;
-
+    private List<Squad> m_squadsList = new List<Squad>();
     private List<SObject> m_currentSelection = new List<SObject>();
     private SObject m_lastSelection;
     private bool m_enableSelection;
@@ -48,6 +48,9 @@ public class PlayerHuman : Player
         rb.useGravity = false;
         #endregion
 
+
+        float[,] newBasis = new float[2, 2] { {-1, 1 }, { 1, 1 } };
+        print("change basis exam = " + Utilities.translateVector(new Vector2(0,2),Utilities.changeBasis(newBasis, new Vector2(0, 1))));
         m_layerMaskFloor = LayerMask.GetMask("Floor");
     }
 
@@ -231,10 +234,24 @@ public class PlayerHuman : Player
     private void actionCurrentSelection(RaycastHit rayHit)
     {
         if (m_currentSelection != null)
+        {
+            List<SMovable> squadSMovable = new List<SMovable>();
+            Squad squad = new Squad();
+            
             foreach (SObject sobject in m_currentSelection)
-                if(sobject.BelongsTo == this)
+                if (sobject.BelongsTo == this)
+                {
+
+                    if(sobject is SMovable)
+                    {
+                        SMovable smovable = (SMovable)sobject;
+                        smovable.setBelongsSquad(squad);
+                    }
+                        
                     sobject.onClick(rayHit);
+                }
+
+            m_squadsList.Add(squad);
+        }             
     }
-
-
 }

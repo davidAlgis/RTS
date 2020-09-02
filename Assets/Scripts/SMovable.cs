@@ -22,9 +22,10 @@ public class SMovable : SObject
     protected float m_distanceMaxAttack;
     [SerializeField]
     protected float m_radiusAttack;
+    private Squad m_belongsToSquad;
 
     public NavMeshAgent Agent { get => m_agent; set => m_agent = value; }
-
+    public Squad BelongsToSquad { get => m_belongsToSquad;}
 
     protected override void Awake()
     {
@@ -32,11 +33,51 @@ public class SMovable : SObject
         m_agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
     }
 
+    public void setBelongsSquad(Squad squad)
+    {
+        m_belongsToSquad = squad;
+        squad.SquadSMovable.Add(this);
+    }
+    public void moveToFloor(RaycastHit rayHit)
+    {
+        StartCoroutine(moveToFloorCoroutine(rayHit));
+    }
+
+    protected IEnumerator moveToFloorCoroutine(RaycastHit rayHit)
+    {
+        while(Vector3.Distance(transform.position, rayHit.point) > 20)
+            yield return new WaitForSeconds(0.5f);
+
+        BelongsToSquad.setDirection(transform.position);
+
+    }
+
+    public void lookForANewDestination(Vector3 originalDestination)
+    {
+        StartCoroutine(lookForANewDestinationCoroutine(originalDestination));
+    }
+
+    protected IEnumerator lookForANewDestinationCoroutine(Vector3 originalDestination)
+    {
+        while (Vector3.Distance(transform.position, originalDestination) > 20)
+            yield return new WaitForSeconds(0.5f);
+
+        BelongsToSquad.getDestination(this);
+
+    }
+
     public override void onClick(RaycastHit rayHit)
     {
         StopAllCoroutines();
         Vector3 dest = rayHit.point;
-        if(rayHit.collider.TryGetComponent(out SObject sobject))
+
+        /*TODO: the variable goal of the belongsSquad will be set 
+         * n times (for n the number of smovable in squad) to the
+         * same value... Find a way to avoid this.*/
+        m_belongsToSquad.Goal = dest;
+        moveToFloor(rayHit);
+
+        if (rayHit.collider.TryGetComponent(out SObject sobject))
         {
             //we update the destination to the nearer destination points.
             if (sobject.PointsDestinationNavMesh != null)
