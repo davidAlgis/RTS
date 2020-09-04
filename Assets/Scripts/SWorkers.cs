@@ -144,6 +144,7 @@ public class SWorkers : SUnit
 
     public void beginConstructBuilding(GameObject buildingGO)
     {
+        print("i");
         StopAllCoroutines();
         buildingGO.isStatic = true;
         buildingGO.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class Squad
 {
@@ -11,29 +12,76 @@ public class Squad
     private uint m_nearerSquare;
     private float m_radiusMax;
     private int m_currentIndexGrid = 0;
+    private bool m_directionIsSet = false;
     public List<SMovable> SquadSMovable { get => m_squadSMovable; set => m_squadSMovable = value; }
+    public bool DirectionIsSet { get => m_directionIsSet; set => m_directionIsSet = value; }
     public Vector3 Goal { get => m_goal; set => m_goal = value; }
+
     public Squad(){}
+
+    public void resetSquad()
+    {
+        m_grid.Clear();
+        m_currentIndexGrid = 0;
+        m_directionIsSet = false;
+    }
+
+    public void defineGoalAndSquadLeader(Vector3 goal)
+    {
+        resetSquad();
+
+        if (m_squadSMovable == null)
+        {
+            Debug.LogWarning("m_squadSMovable is empty");
+            return;
+        }
+
+        float lengthMax = 0.0f;
+        SMovable squadLeader = m_squadSMovable[0];
+        Vector3 pointForDirection = m_squadSMovable[0].transform.position;
+
+        foreach(SMovable smovable in m_squadSMovable)
+        {
+            Pair<float,Vector3> lengthAndFinalCorner = smovable.calculatePathLength(goal);
+            if (lengthMax < lengthAndFinalCorner.first)
+            {
+                squadLeader = smovable;
+                lengthMax = lengthAndFinalCorner.first;
+                pointForDirection = lengthAndFinalCorner.second;
+            }
+        }
+        m_goal = goal;
+
+        setDirection(pointForDirection);
+    }
 
     /*when the first smovable reach the zone around the goal, he defined the goal 
      * and the other smovable stop their coroutine. */
     public void setDirection(Vector3 point)
     {
-        
         if (m_goal != null)
         {
             m_direction = new Vector2(m_goal.x - point.x, m_goal.z - point.z);
             m_direction = m_direction.normalized;
         } 
-
-
-        if(m_squadSMovable == null)
+        else
         {
-            Debug.LogError("The squad as not been well defined");
+            Debug.LogError("The goal has not been defined");
             return;
         }
 
-        m_nearerSquare = (uint)(Mathf.Sqrt(m_squadSMovable.Count)) + 1;
+        if(m_squadSMovable == null)
+        {
+            Debug.LogError("The squad has not been well defined");
+            return;
+        }
+
+        float squareRoot = Mathf.Sqrt(m_squadSMovable.Count);
+
+        if (squareRoot - (int)squareRoot == 0.0f)
+            m_nearerSquare = (uint)(squareRoot);
+        else
+            m_nearerSquare = (uint)(squareRoot) + 1;
 
         m_radiusMax = 1.0f;
         
@@ -42,22 +90,14 @@ public class Squad
             smovable.StopAllCoroutines();
             if (smovable.Radius > m_radiusMax)
                 m_radiusMax = smovable.Radius;
-
-            smovable.lookForANewDestination(m_goal);
         }
-
         setGrid();
 
-        foreach (SMovable smovable in m_squadSMovable)
-            smovable.lookForANewDestination(m_goal);
-
-
-
+        m_directionIsSet = true;
     }
 
     public void getDestination(SMovable smovable)
     {
-        Debug.LogWarning("m_grid.Count" + m_grid.Count + " m_currentIndexGrid = " + m_currentIndexGrid);
         while(m_currentIndexGrid < m_grid.Count)
         {
             Vector2 currentPositionOnGrid = getNthPositionOnGrid(m_currentIndexGrid);
@@ -66,12 +106,10 @@ public class Squad
             if ( Utilities.isPositionAvailable(newDestination, smovable.Radius))
             {
                 m_currentIndexGrid++;
-                Debug.LogWarning(smovable.gameObject.name +"reach destination " + m_currentIndexGrid);
                 smovable.Agent.destination = newDestination;
                 return;
             }
 
-            Debug.LogWarning("doesnt suceed to go on the " + m_currentIndexGrid + " name = " + smovable.gameObject.name);
             m_currentIndexGrid++;
         }
 
@@ -82,6 +120,7 @@ public class Squad
 
     public void setGrid()
     {
+
         float sizeOfSquare = m_radiusMax * ( m_nearerSquare - 1);
         Vector2 currentPosition = new Vector2(-sizeOfSquare, sizeOfSquare);
 
@@ -102,8 +141,7 @@ public class Squad
                 currentPosition.y -= m_radiusMax * 2;
             }
             m_grid.Add(Utilities.translateVector(translation, Utilities.changeBasis(newBasis, currentPosition)));
-            //print("i = "+i+ " "  + m_grid[i] + " in new basis =" + Utilities.translateVector(translation, Utilities.changeBasis(newBasis, m_grid[i])));
-            Utilities.instantiateSphereAtPosition(new Vector3(m_grid[i].x, 0.1f, m_grid[i].y), "grid" + i);
+            //Utilities.instantiateSphereAtPosition(new Vector3(m_grid[i].x, 0.1f, m_grid[i].y), "grid" + i);
         }
     }
 
@@ -119,5 +157,6 @@ public class Squad
         return m_grid[n];
     }
 
+    
 
 }

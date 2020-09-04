@@ -158,7 +158,6 @@ public class SObject : MonoBehaviour
 
     public void setColorCursor(Color color)
     {
-        print("change line color");
         m_lineRenderer.startColor = color;
         m_lineRenderer.endColor = color;
         m_cursorRenderer.material.SetColor("_Color", color);

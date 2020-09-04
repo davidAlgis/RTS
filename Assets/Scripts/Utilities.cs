@@ -173,12 +173,14 @@ public class Utilities : MonoBehaviour
 
         if (hitColliders.Length > 0)
         {
-            print("hit :" + hitColliders[0].gameObject.name);
+            //print("hit :" + hitColliders[0].gameObject.name);
             return false;
         }
         else
             return true;
     }
+
+    
 }
 
 

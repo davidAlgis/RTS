@@ -8,6 +8,7 @@ public class PlayerHuman : Player
 {
     private GameObject m_beginCreation = null;
     private List<Squad> m_squadsList = new List<Squad>();
+    private Squad m_currentSquad;
     private List<SObject> m_currentSelection = new List<SObject>();
     private SObject m_lastSelection;
     private bool m_enableSelection;
@@ -20,6 +21,7 @@ public class PlayerHuman : Player
     private Vector3 m_extremityBoxSelection2;
     private Vector3 m_extremitySelectionUI1;
     #endregion
+
 
     #region getter
     public bool MouseIsHold { get => m_mouseIsHold; set => m_mouseIsHold = value; }
@@ -48,9 +50,6 @@ public class PlayerHuman : Player
         rb.useGravity = false;
         #endregion
 
-
-        float[,] newBasis = new float[2, 2] { {-1, 1 }, { 1, 1 } };
-        print("change basis exam = " + Utilities.translateVector(new Vector2(0,2),Utilities.changeBasis(newBasis, new Vector2(0, 1))));
         m_layerMaskFloor = LayerMask.GetMask("Floor");
     }
 
@@ -186,6 +185,8 @@ public class PlayerHuman : Player
                 m_boxForSelection.enabled = false;
                 
             }
+
+            m_squadsList.Add(m_currentSquad);
         }
     }
 
@@ -203,31 +204,37 @@ public class PlayerHuman : Player
         if(m_currentSelection != null)
             foreach(SObject selectableObject in m_currentSelection)
                 selectableObject.unSelect();
-            
-        
+
+        m_currentSquad = null;
         m_currentSelection.Clear();
     }
 
-    public void addToCurrentSelection(SObject sObject)
+    public void addToCurrentSelection(SObject sobject)
     {
-        if (sObject.BelongsTo == this)
+        if (sobject.BelongsTo == this)
         {
+            if (m_currentSquad == null)
+                m_currentSquad = new Squad();
+
+            if (sobject is SMovable)
+            {
+                SMovable smovable = (SMovable)sobject;
+                smovable.setBelongsSquad(m_currentSquad);
+            }
+
             //if it belongs to the player we update the UI
-            sObject.updateUI();
-            sObject.setColorCursor(Color.blue);
+            sobject.updateUI();
+            sobject.setColorCursor(Color.blue);
         }    
-        else if (sObject.BelongsTo is PlayerEnnemy)
-            sObject.setColorCursor(Color.red);
-        else if (sObject.IsNeutral == true)
-            sObject.setColorCursor(Color.grey);
+        else if (sobject.BelongsTo is PlayerEnnemy)
+            sobject.setColorCursor(Color.red);
+        else if (sobject.IsNeutral == true)
+            sobject.setColorCursor(Color.grey);
         else
-            Debug.LogWarning("Unknown belonging for " + sObject.ID + " cannot set color of cursor");
+            Debug.LogWarning("Unknown belonging for " + sobject.ID + " cannot set color of cursor");
 
-        sObject.isSelect();
-        m_currentSelection.Add(sObject);
-
-        
-        //print("selectable = " + selectableObject.gameObject.name);
+        sobject.isSelect();
+        m_currentSelection.Add(sobject);
     }
     #endregion
 
@@ -235,23 +242,12 @@ public class PlayerHuman : Player
     {
         if (m_currentSelection != null)
         {
-            List<SMovable> squadSMovable = new List<SMovable>();
-            Squad squad = new Squad();
-            
+            m_currentSquad.DirectionIsSet = false;
             foreach (SObject sobject in m_currentSelection)
                 if (sobject.BelongsTo == this)
                 {
-
-                    if(sobject is SMovable)
-                    {
-                        SMovable smovable = (SMovable)sobject;
-                        smovable.setBelongsSquad(squad);
-                    }
-                        
                     sobject.onClick(rayHit);
                 }
-
-            m_squadsList.Add(squad);
         }             
     }
 }
