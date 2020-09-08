@@ -35,6 +35,7 @@ public class UIManager : MonoBehaviour
     }
 
     public GameObject BuildingCreated { get => m_buildingCreated; set => m_buildingCreated = value; }
+
     public GameObject DefaultLineRendererGO { get => m_defaultLineRendererGO; set => m_defaultLineRendererGO = value; }
 
     private void Awake()

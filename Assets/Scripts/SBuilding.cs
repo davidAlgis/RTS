@@ -78,7 +78,8 @@ public class SBuilding : SUnmovable
         }
 
         sunit.BelongsTo = GameManager.Instance.CurrentPlayer;
-        Instantiate(sunitGO, PointsDestinationNavMesh[3].first, Quaternion.identity);
+        //TODO set a spawn point
+        Instantiate(sunitGO, PointsDestinationNavMesh[0], Quaternion.identity);
     }
 
     IEnumerator treatQueue()

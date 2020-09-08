@@ -19,6 +19,7 @@ public class Squad
 
     public Squad(){}
 
+    #region floor
     public void resetSquad()
     {
         m_grid.Clear();
@@ -96,7 +97,7 @@ public class Squad
         m_directionIsSet = true;
     }
 
-    public void getDestination(SMovable smovable)
+    public void getDestinationFloor(SMovable smovable)
     {
         while(m_currentIndexGrid < m_grid.Count)
         {
@@ -130,7 +131,6 @@ public class Squad
 
         Vector2 translation = new Vector2(m_goal.x, m_goal.z);
         m_grid.Add(Utilities.translateVector(translation, Utilities.changeBasis(newBasis, currentPosition)));
-        //print("0 = " + m_grid[0] + " in new basis =" + Utilities.translateVector(translation, Utilities.changeBasis(newBasis, m_grid[0])));
         for (int i = 1; i < m_nearerSquare * m_nearerSquare * 2;i++)
         {
             currentPosition.x += m_radiusMax * 2;
@@ -156,7 +156,39 @@ public class Squad
 
         return m_grid[n];
     }
+    #endregion
 
-    
+    #region sobject
+    public void getDestinationSObject(SObject sobject)
+    {
+        int indexInDestination = 0;
+        bool haveFindDestination;
 
+        foreach(SMovable smovable in m_squadSMovable)
+        {
+            haveFindDestination = false;
+
+            for(int i = indexInDestination; i < sobject.PointsDestinationNavMesh.Count; i++)
+            {
+                if (Utilities.isPositionAvailable(sobject.PointsDestinationNavMesh[i], smovable.Radius) == true)
+                {
+
+                    smovable.Agent.destination = sobject.PointsDestinationNavMesh[i];
+                    indexInDestination = i + 1;
+                    haveFindDestination = true;
+                    smovable.moveToSquadSObject(sobject);
+                    break;
+
+                }
+            }
+
+            if (haveFindDestination == false)
+            {
+                Debug.LogWarning("Unable to find any destination for " + smovable.gameObject.name);
+            }
+            
+        }
+    }
+
+    #endregion
 }

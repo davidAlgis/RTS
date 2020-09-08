@@ -126,7 +126,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_belongsTo: {fileID: 0}
   m_isNeutral: 0
-  m_radius: 10
+  m_radius: 7.5
   m_fieldType: 0
   m_nbrUnitMaxOnObject: 4
   m_buttonCreation:

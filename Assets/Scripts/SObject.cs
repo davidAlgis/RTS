@@ -20,7 +20,7 @@ public class SObject : MonoBehaviour
     To avoid agent which cannot reach is destination*/
     [SerializeField]
     protected float m_radius = 0f;
-    private List<Pair<Vector3, bool>> m_pointsDestionationNavMesh = new List<Pair<Vector3, bool>>();
+    private List<Vector3> m_pointsDestionationNavMesh = new List<Vector3>();
     [SerializeField]
     private FieldSelection m_fieldType;
     [SerializeField]
@@ -36,7 +36,7 @@ public class SObject : MonoBehaviour
 
     #region getter
     public Player BelongsTo { get => m_belongsTo; set => m_belongsTo = value; }
-    public List<Pair<Vector3, bool>> PointsDestinationNavMesh { get => m_pointsDestionationNavMesh; set => m_pointsDestionationNavMesh = value; }
+    public List<Vector3> PointsDestinationNavMesh { get => m_pointsDestionationNavMesh; set => m_pointsDestionationNavMesh = value; }
     public bool IsNeutral { get => m_isNeutral; set => m_isNeutral = value; }
     public string ID { get => m_ID; set => m_ID = value; }
     public uint Health { get => m_health; }
@@ -85,6 +85,7 @@ public class SObject : MonoBehaviour
 
         selectionFieldGO.transform.parent = gameObject.transform;
         selectionFieldGO.name = gameObject.name + "SelectionField";
+        selectionFieldGO.layer = LayerMask.NameToLayer("Selectable");
 
         selectionFieldGO.layer = 9;//GameManager.Instance.LayerSelection;
         if (selectionFieldGO.TryGetComponent(out m_lineRenderer) == false)
@@ -174,31 +175,75 @@ public class SObject : MonoBehaviour
 
     public void definePointsDestination()
     {
-        float left, up, right, down, height;
-        left = transform.position.x - m_radius / Mathf.Sqrt(2);
-        right = transform.position.x + m_radius / Mathf.Sqrt(2);
-        up = transform.position.z + m_radius / Mathf.Sqrt(2);
-        down = transform.position.z - m_radius / Mathf.Sqrt(2);
-        height = transform.position.y;
+        float greaterRadius = m_radius + 0.5f;
+        float x;
 
-        m_pointsDestionationNavMesh.Add(new Pair<Vector3, bool>(new Vector3(left, height, up), false));
-        m_pointsDestionationNavMesh.Add(new Pair<Vector3, bool>(new Vector3(left, height, down), false));
-        m_pointsDestionationNavMesh.Add(new Pair<Vector3, bool>(new Vector3(right, height, up), false));
-        m_pointsDestionationNavMesh.Add(new Pair<Vector3, bool>(new Vector3(right, height, down), false));
-        
-        if(m_radius > 2.0f)
+        switch (m_fieldType)
         {
-            m_pointsDestionationNavMesh.Add(new Pair<Vector3, bool>(new Vector3(transform.position.x, height, up), false));
-            m_pointsDestionationNavMesh.Add(new Pair<Vector3, bool>(new Vector3(transform.position.x, height, down), false));
-            m_pointsDestionationNavMesh.Add(new Pair<Vector3, bool>(new Vector3(left, height, transform.position.z), false));
-            m_pointsDestionationNavMesh.Add(new Pair<Vector3, bool>(new Vector3(right, height, transform.position.z), false));
+            case FieldSelection.circle:
+
+                for(x = 0.0f; x<2*Mathf.PI; x+=2.0f)
+                {
+                    Vector3 pos = new Vector3(transform.position.x + greaterRadius * Mathf.Cos(x), 0.01f, transform.position.z + greaterRadius * Mathf.Sin(x));
+
+                    //With the last element we check if it isn't too close of the first one.
+                    if (x + 2.0f > 2 * Mathf.PI)
+                        if (m_pointsDestionationNavMesh.Count > 1)
+                            if (Vector3.Distance(pos, m_pointsDestionationNavMesh[0]) < 2.0f)
+                                break;
+
+                    m_pointsDestionationNavMesh.Add(pos);
+                }
+
+                break;
+            case FieldSelection.square:
+
+                //pythagore
+                float length = Mathf.Sqrt(2 * greaterRadius * greaterRadius);
+                //right
+                for (x = 2.0f; x < length - 2.0f; x += 2.0f)
+                {
+                    Vector3 pos = new Vector3(transform.position.x + length / 2.0f, 0.01f, transform.position.z - length / 2.0f + x);
+                    m_pointsDestionationNavMesh.Add(pos);
+                }
+                //up
+                for (x = 0.0f; x < length; x += 2.0f)
+                {
+                    Vector3 pos = new Vector3(transform.position.x - length/2.0f + x, 0.01f, transform.position.z + length / 2.0f);
+                    m_pointsDestionationNavMesh.Add(pos);
+                }
+                //left
+                for (x = 2.0f; x < length - 2.0f; x += 2.0f)
+                {
+                    Vector3 pos = new Vector3(transform.position.x - length / 2.0f, 0.01f, transform.position.z - length / 2.0f + x);
+                    m_pointsDestionationNavMesh.Add(pos);
+                }
+                //bottom
+                for (x = 0.0f; x < length; x += 2.0f)
+                {
+                    Vector3 pos = new Vector3(transform.position.x - length / 2.0f + x, 0.01f, transform.position.z - length / 2.0f);
+                    m_pointsDestionationNavMesh.Add(pos);
+                }
+
+                break;
+            default:
+                Debug.LogWarning("Unknown FieldSelectionType for " + gameObject.name);
+                break;
+
         }
-        /*
-        m_pointsDestinationNavMesh[0] = new Vector3(left, height, up);
-        m_pointsDestinationNavMesh[1] = new Vector3(left, height, down);
-        m_pointsDestinationNavMesh[2] = new Vector3(right, height, up);
-        m_pointsDestinationNavMesh[3] = new Vector3(right, height, down);
-        */
+
+    }
+
+    public static SObject getSobjectFromSelectionField(GameObject selectionFieldGO)
+    {
+        GameObject go = selectionFieldGO.transform.parent.gameObject;
+
+        if (go.TryGetComponent(out SObject sobject) == false)
+        {
+            Debug.LogWarning("The selectionfield " + selectionFieldGO.name + " wasn't children of a sobject");
+            return go.AddComponent(typeof(SObject)) as SObject;
+        }
+        return sobject;
     }
 
     public void isSelect()
@@ -218,6 +263,8 @@ public class SObject : MonoBehaviour
     {
 
     }
+
+
 
     public bool damage(uint damage)
     {

@@ -39,9 +39,41 @@ public class SMovable : SObject
         squad.SquadSMovable.Add(this);
     }
 
-
-    public void moveToFloor()
+    public override void onClick(RaycastHit rayHit)
     {
+        StopAllCoroutines();
+        moveTo(rayHit);
+        attack(rayHit);
+    }
+
+    #region movement
+
+    public void moveTo(RaycastHit rayHit)
+    {
+        Vector3 dest = rayHit.point;
+
+        if (rayHit.collider.gameObject.layer == LayerMask.NameToLayer("Floor"))
+        {
+            Agent.destination = dest;
+            moveToSquadFloor(dest);
+        }
+        else if(rayHit.collider.gameObject.layer == LayerMask.NameToLayer("Selectable"))
+        {
+            
+            SObject sobject = SObject.getSobjectFromSelectionField(rayHit.collider.gameObject);
+            //if it's a smovable we redefine his destination points
+            if (sobject is SMovable)
+                sobject.definePointsDestination();
+            moveToSquadSobject(sobject);
+        }
+
+    }
+
+    public void moveToSquadFloor(Vector3 dest)
+    {
+        if (m_belongsToSquad.SquadSMovable[0] == this)
+            m_belongsToSquad.defineGoalAndSquadLeader(dest);
+        
         StartCoroutine(moveToFloorCoroutine());
     }
 
@@ -50,50 +82,81 @@ public class SMovable : SObject
         while(BelongsToSquad.DirectionIsSet == false)
             yield return new WaitForSeconds(0.5f);
 
-        lookForANewDestination(BelongsToSquad.Goal);
+        StartCoroutine(lookForANewDestinationFloorCoroutine(BelongsToSquad.Goal));
     }
 
-    public void lookForANewDestination(Vector3 originalDestination)
-    {
-        StartCoroutine(lookForANewDestinationCoroutine(originalDestination));
-    }
-
-    protected IEnumerator lookForANewDestinationCoroutine(Vector3 originalDestination)
+    protected IEnumerator lookForANewDestinationFloorCoroutine(Vector3 originalDestination)
     { 
         while (Vector3.Distance(transform.position, originalDestination) > 20)
             yield return new WaitForSeconds(0.1f);
 
-        
-
-        BelongsToSquad.getDestination(this);
+        BelongsToSquad.getDestinationFloor(this);
 
     }
 
-    public override void onClick(RaycastHit rayHit)
+    public bool moveOneToSObject(SObject target)
     {
-        StopAllCoroutines();
-        Vector3 dest = rayHit.point;
-        Agent.destination = dest;
 
+        Vector3 dest = new Vector3(0.0f, Mathf.Infinity, 0.0f);
+        if (target.PointsDestinationNavMesh != null)
+            for (int i = 1; i < target.PointsDestinationNavMesh.Count; i++)
+            {
+                Vector3 point = target.PointsDestinationNavMesh[i];
+                if (Vector3.Distance(transform.position, dest) > Vector3.Distance(transform.position, point) && Utilities.isPositionAvailable(target.PointsDestinationNavMesh[i], m_radius))
+                    dest = point;
 
+            }
+
+        moveToSquadSObject(target);
+        if (dest != new Vector3(0.0f, Mathf.Infinity, 0.0f))
+        {
+            Debug.LogWarning("Didn't find any destination for " + gameObject.name + " stay at his initial position");
+
+            return false;
+        }
+        else
+        {
+            Agent.destination = dest;
+            return true;
+        }
+    }
+
+    public void moveToSquadSobject(SObject target)
+    {
+        //we execute the code only once by the squad leader.
         if (m_belongsToSquad.SquadSMovable[0] == this)
-            m_belongsToSquad.defineGoalAndSquadLeader(dest);
+            m_belongsToSquad.getDestinationSObject(target);
+    }
 
-        moveToFloor();
+    public void moveToSquadSObject(SObject sobject)
+    {
+        StartCoroutine(moveToSObjectCoroutine(sobject));
+    }
 
+    public IEnumerator moveToSObjectCoroutine(SObject sobject)
+    {
+        while(Vector3.Distance(transform.position, Agent.destination) < 3.0f*m_radius)
+        {
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        /*If the position isn't available, we look if another position is 
+         * available. Else the smovable stop moving.*/
+        if (Utilities.isPositionAvailable(Agent.destination, m_radius) == false)
+            if (moveOneToSObject(sobject) == false)
+                Agent.destination = transform.position;
+
+    }
+
+    #endregion
+
+    #region attack
+
+    protected void attack(RaycastHit rayHit)
+    {
         if (rayHit.collider.TryGetComponent(out SObject sobject))
         {
-            //we update the destination to the nearer destination points.
-            if (sobject.PointsDestinationNavMesh != null)
-                for(int i=0; i<sobject.PointsDestinationNavMesh.Count; i++)
-                {
-                    Vector3 point = sobject.PointsDestinationNavMesh[i].first;
-                    if (Vector3.Distance(transform.position, dest) > Vector3.Distance(transform.position, point) && sobject.PointsDestinationNavMesh[i].second == false)
-                    {
-                        dest = point;
-                        sobject.PointsDestinationNavMesh[i].second = true;
-                    }
-                }
+
             //TODO: case with animals which are neutral but can be attacked
             //if the sobject belongs to ennemy we attack it
             if (sobject.BelongsTo is PlayerEnnemy)
@@ -104,8 +167,6 @@ public class SMovable : SObject
                     StartCoroutine(followSObject((SMovable)sobject));
             }
         }
-        
-        //Agent.destination = dest;
     }
 
     protected IEnumerator actionAttack(SObject target)
@@ -113,15 +174,8 @@ public class SMovable : SObject
         while (target.Health > 0)
         {
             Vector3 dest = transform.position;
-            for (int i = 0; i < target.PointsDestinationNavMesh.Count; i++)
-            {
-                Vector3 point = target.PointsDestinationNavMesh[i].first;
-                if (Vector3.Distance(transform.position, dest) > Vector3.Distance(transform.position, point) && target.PointsDestinationNavMesh[i].second == false)
-                {
-                    target.PointsDestinationNavMesh[i].second = true;
-                    dest = point;
-                }
-            }
+
+            moveOneToSObject(target);
 
             if (m_distanceMaxAttack > Vector3.Distance(transform.position, dest))
                 if (target.damage(m_powerAttack))
@@ -166,14 +220,8 @@ public class SMovable : SObject
                 yield break;
             }
 
-            for (int j = 0; j < target.PointsDestinationNavMesh.Count; j++)
-            {
-                Vector3 point = target.PointsDestinationNavMesh[j].first;
-                if (Vector3.Distance(transform.position, dest) > Vector3.Distance(transform.position, point))
-                    dest = point;
-            }
-
-            Agent.destination = dest;
+            if(moveOneToSObject(target) == false);
+                Agent.destination = dest;
 
             if (target == null)
                 yield break;
@@ -183,6 +231,7 @@ public class SMovable : SObject
         }
     }
 
+    #endregion
     public Pair<float, Vector3> calculatePathLength(Vector3 destination)
     {
         // Create a path and set it based on a target position.
@@ -214,6 +263,9 @@ public class SMovable : SObject
             pathLength += Vector3.Distance(allWayPoints[i], allWayPoints[i + 1]);
         }
 
-        return new Pair<float, Vector3>(pathLength, path.corners[path.corners.Length-2]);
+        if(path.corners.Length > 2)
+            return new Pair<float, Vector3>(pathLength, path.corners[path.corners.Length-2]);
+        else
+            return new Pair<float, Vector3>(pathLength, transform.position);
     }
 }

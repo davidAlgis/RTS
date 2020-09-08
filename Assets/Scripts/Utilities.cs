@@ -167,13 +167,14 @@ public class Utilities : MonoBehaviour
 
     public static bool isPositionAvailable(Vector3 position, float radius)
     {
-        int layerMask = ~LayerMask.GetMask("Floor");
+        int layerMask = ~(LayerMask.GetMask("Floor") | LayerMask.GetMask("Selectable"));
+
         var hitColliders = Physics.OverlapSphere(position, radius,layerMask);
 
 
         if (hitColliders.Length > 0)
         {
-            //print("hit :" + hitColliders[0].gameObject.name);
+            print("hit :" + hitColliders[0].gameObject.name);
             return false;
         }
         else

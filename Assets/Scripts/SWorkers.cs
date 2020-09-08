@@ -109,8 +109,6 @@ public class SWorkers : SUnit
             return;
         }
 
-
-
         sbuilding.BelongsTo = GameManager.Instance.CurrentPlayer;
         sbuilding.IsInConstruction = true;
         //define the initial position of the building with raycast on floor
@@ -144,7 +142,6 @@ public class SWorkers : SUnit
 
     public void beginConstructBuilding(GameObject buildingGO)
     {
-        print("i");
         StopAllCoroutines();
         buildingGO.isStatic = true;
         buildingGO.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
@@ -158,20 +155,8 @@ public class SWorkers : SUnit
                 Debug.LogWarning("Unable to find the material component of " + buildingGO.name);
 
             //we update the destination to the nearer destination points.
-            if (sbuilding.PointsDestinationNavMesh != null)
-                for (int i = 0; i < sbuilding.PointsDestinationNavMesh.Count; i++)
-                {
-                    Vector3 point = sbuilding.PointsDestinationNavMesh[i].first;
-                    if (Vector3.Distance(transform.position, dest) > Vector3.Distance(transform.position, point) && sbuilding.PointsDestinationNavMesh[i].second == false)
-                    {
-                        dest = point;
-                        sbuilding.PointsDestinationNavMesh[i].second = true;
-                    }
-                     
-                }
+            moveOneToSObject(sbuilding);
         }
-        //move to the building
-        Agent.destination = dest;
 
         StartCoroutine(constructBuildingCoroutine(buildingGO));
     }
@@ -181,20 +166,13 @@ public class SWorkers : SUnit
         Vector3 dest = buildingGO.transform.position;
         if (buildingGO.TryGetComponent(out SBuilding sbuilding))
         {
-            //we update the destination to the nearer destination points.
-            if (sbuilding.PointsDestinationNavMesh != null)
-                for (int i = 0; i < sbuilding.PointsDestinationNavMesh.Count; i++)
-                {
-                    Vector3 point = sbuilding.PointsDestinationNavMesh[i].first;
-                    if (Vector3.Distance(transform.position, dest) > Vector3.Distance(transform.position, point) && sbuilding.PointsDestinationNavMesh[i].second == false)
-                    {
-                        sbuilding.PointsDestinationNavMesh[i].second = true;
-                        dest = point;
-                    }
-                }
+            if (moveOneToSObject(sbuilding) == false)
+            {
+                Debug.Log("The building " + buildingGO.name + " is already in construction");
+                return;
+
+            }
         }
-        //move to the building
-        Agent.destination = dest;
 
         StartCoroutine(constructBuildingCoroutine(buildingGO));
     }
