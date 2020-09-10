@@ -2638,10 +2638,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69c51fbb6afa14f4b8c69b047904910f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_wood: 0
-  m_rock: 0
-  m_gold: 0
-  m_food: 0
+  m_resources:
+    wood: 0
+    gold: 0
+    rock: 0
+    food: 0
 --- !u!4 &594162640
 Transform:
   m_ObjectHideFlags: 0
@@ -3600,7 +3601,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ScreenEdgeBorderThickness: 5
-  RTSMode: 1
+  RTSMode: 0
   FlyCameraMode: 0
   minPanSpeed: 20
   maxPanSpeed: 100
@@ -5137,15 +5138,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_belongsTo: {fileID: 0}
+  m_name: 
   m_isNeutral: 1
   m_radius: 3
   m_fieldType: 0
-  m_nbrUnitMaxOnObject: 4
   m_buttonCreation: []
   m_health: 100
   m_durationCreation: 0
-  m_contains: 100
-  m_type: 0
+  m_costResources:
+    wood: 0
+    gold: 0
+    rock: 0
+    food: 0
+  m_contains:
+    wood: 10
+    gold: 0
+    rock: 0
+    food: 0
 --- !u!136 &1556959702
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -5557,7 +5566,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_currentPlayer: {fileID: 1740688932}
-  m_matBuildingCreation: {fileID: 2100000, guid: cb598e4db3dd5f74cb9ea43906a92051,
+  m_matBuildingCreationAvailable: {fileID: 2100000, guid: 648aee4cd23c6f94b8bd555ca04e01b7,
+    type: 2}
+  m_matBuildingCreationNotAvailable: {fileID: 2100000, guid: cb598e4db3dd5f74cb9ea43906a92051,
     type: 2}
 --- !u!1 &1673459510
 GameObject:
@@ -5906,10 +5917,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc1dd320a04be6c4d8173b97aa5874bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_wood: 0
-  m_rock: 0
-  m_gold: 0
-  m_food: 0
+  m_resources:
+    wood: 1000
+    gold: 1000
+    rock: 1000
+    food: 1000
 --- !u!1 &1823005986
 GameObject:
   m_ObjectHideFlags: 0

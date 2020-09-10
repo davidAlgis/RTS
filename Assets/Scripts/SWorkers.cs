@@ -4,48 +4,45 @@ using UnityEngine;
 
 public class SWorkers : SUnit
 {
-    //time for taking 10 units of ressources;
+    //time for taking 10 units of resources;
+    [SerializeField]
     private float m_speedHarvest = 10.0f;
     //Factor of speed of construction, reduce it if you want to increase the speed
     private float m_speedConstruction = 1.0f;
+
     private SBuilding m_buildingUnderConstruction = null;
+
     public override void onClick(RaycastHit rayHit)
     {
         base.onClick(rayHit);
 
         //if the builder was building a construction, we reduce the number of builder on this construction
-        if(m_buildingUnderConstruction != null)
+        if (m_buildingUnderConstruction != null)
         {
             m_buildingUnderConstruction.BuilderOnConstruction--;
             m_buildingUnderConstruction = null;
         }
 
-        if(rayHit.collider.TryGetComponent(out SRessources sressources))
+        clickOnConstruction(rayHit);
+        harvest(rayHit);
+    }
+
+    #region harvest
+    public void harvest(RaycastHit rayHit)
+    {
+        if (rayHit.collider.gameObject.layer == LayerMask.NameToLayer("Selectable"))
         {
+            SObject sobject = SObject.getSobjectFromSelectionField(rayHit.collider.gameObject);
 
-            print("gonna to harvest " + gameObject.name + ID);
-            StartCoroutine(actionGetRessourcesCoroutine(sressources));
-        }
-
-        if ((rayHit.collider.TryGetComponent(out SBuilding sbuilding)))
-        {
-            if(sbuilding.BelongsTo != this.BelongsTo)
+            if (sobject is SResources)
             {
-
-                print("gonna to attack " + gameObject.name + ID);
-                StartCoroutine(actionGetRessourcesCoroutine(sressources));
-
-            }
-            else
-            {
-                //if the building is in construction we continue the construction
-                if (sbuilding.IsInConstruction)
-                    continueConstructBuilding(sbuilding.gameObject);
+                print("gonna to harvest " + ID);
+                StartCoroutine(actionGetRessourcesCoroutine((SResources)sobject));
             }
         }
     }
 
-    IEnumerator actionGetRessourcesCoroutine(SRessources sressources)
+    IEnumerator actionGetRessourcesCoroutine(SResources sresources)
     {
         int i = 0;
         while(Utilities.navMeshHaveReachDestination(m_agent) == false)
@@ -61,37 +58,52 @@ public class SWorkers : SUnit
             i++;
         }
 
-        //add ressources until the ressources is empty.
-        while (sressources.Contains > 0)
+        //add resources until the resources is empty.
+        while (sresources.Contains >= 0)
         {
-
+            
             yield return new WaitForSeconds(m_speedHarvest);
-            uint nbrOfRessources = sressources.getRessources(10);
-            print("get " + nbrOfRessources + " ressources");
-            if (IsNeutral == false)
-            {
-                switch(sressources.Type)
-                {
-                    case RessourcesType.wood:
-                        print("add wood");
-                        m_belongsTo.Wood += nbrOfRessources;
-                        break;
-                    case RessourcesType.food:
-                        m_belongsTo.Food += nbrOfRessources;
-                        break;
-                    case RessourcesType.gold:
-                        m_belongsTo.Gold += nbrOfRessources;
-                        break;
-                    case RessourcesType.rock:
-                        m_belongsTo.Rock += nbrOfRessources;
-                        break;
+            Resources resources = sresources.getResources(10);
+            print("get " + resources.ToString() + " resources");
 
-                }
-            } 
+            if (IsNeutral == false)
+                m_belongsTo.Resources += resources;
+
+            if (sresources.gameObject == null)
+                break;
+             
         }
 
 
 
+    }
+
+    #endregion
+
+    #region buildingCreation
+    public void clickOnConstruction(RaycastHit rayHit)
+    {
+        if (rayHit.collider.gameObject.layer == LayerMask.NameToLayer("Selectable"))
+        {
+            SObject sobject = SObject.getSobjectFromSelectionField(rayHit.collider.gameObject);
+
+            if (sobject is SBuilding)
+            {
+                SBuilding sbuilding = (SBuilding)sobject;
+                if (sbuilding.BelongsTo != m_belongsTo)
+                {
+
+                    print("gonna to attack " + ID);
+                    //TODO add attack here
+                }
+                else
+                {
+                    //if the building is in construction we continue the construction
+                    if (sbuilding.IsInConstruction)
+                        continueConstructBuilding(sbuilding.gameObject);
+                }
+            }
+        }
     }
 
     public void beginCreateBuilding(GameObject buildingGO)
@@ -109,8 +121,16 @@ public class SWorkers : SUnit
             return;
         }
 
+
+
         sbuilding.BelongsTo = GameManager.Instance.CurrentPlayer;
+
+        if (m_belongsTo.canBuySobject(sbuilding) == false)
+            return;
+
+        UIManager.Instance.SbuildingCreated = sbuilding;
         sbuilding.IsInConstruction = true;
+
         //define the initial position of the building with raycast on floor
         LayerMask mask = LayerMask.GetMask("Floor");
 
@@ -118,8 +138,10 @@ public class SWorkers : SUnit
         if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out rayHit, Mathf.Infinity, mask))
         {
             Vector3 origPos = rayHit.point;
+            //when we change this value, the update function of UIManager and the update of PlayerHuman handle the rest.
             UIManager.Instance.BuildingCreated = Instantiate(buildingGO, origPos, Quaternion.identity);
 
+            
             //translate the building above floor
             if (UIManager.Instance.BuildingCreated.TryGetComponent(out Collider collider))
             {
@@ -132,12 +154,15 @@ public class SWorkers : SUnit
 
         //define the usual material of construction
         if (UIManager.Instance.BuildingCreated.TryGetComponent(out MeshRenderer meshRenderer))
-            meshRenderer.material = GameManager.Instance.MatBuildingCreation;
+            meshRenderer.material = GameManager.Instance.MatBuildingCreationAvailable;
         else
             Debug.LogWarning("Unable to find the material component of " + UIManager.Instance.BuildingCreated.name);
 
         if (UIManager.Instance.BuildingCreated.TryGetComponent(out Rigidbody rb))
             rb.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotation;
+
+        
+        
     }
 
     public void beginConstructBuilding(GameObject buildingGO)
@@ -154,30 +179,29 @@ public class SWorkers : SUnit
             else
                 Debug.LogWarning("Unable to find the material component of " + buildingGO.name);
 
-            //we update the destination to the nearer destination points.
-            moveOneToSObject(sbuilding);
+            //we update the destination of the whole squad
+            moveToSquadSobject(sbuilding);
         }
 
-        StartCoroutine(constructBuildingCoroutine(buildingGO));
+        //we construct the building for the whole squad
+        m_belongsToSquad.constructBuilding(buildingGO);
     }
 
     public void continueConstructBuilding(GameObject buildingGO)
     {
         Vector3 dest = buildingGO.transform.position;
         if (buildingGO.TryGetComponent(out SBuilding sbuilding))
-        {
-            if (moveOneToSObject(sbuilding) == false)
-            {
-                Debug.Log("The building " + buildingGO.name + " is already in construction");
-                return;
+            moveToSquadSobject(sbuilding);
+        
+        m_belongsToSquad.constructBuilding(buildingGO);
+    }
 
-            }
-        }
-
+    public void constructBuilding(GameObject buildingGO)
+    {
         StartCoroutine(constructBuildingCoroutine(buildingGO));
     }
 
-    IEnumerator constructBuildingCoroutine(GameObject buildingGO)
+    private IEnumerator constructBuildingCoroutine(GameObject buildingGO)
     {
         #region constructBuildingInit
         
@@ -251,7 +275,6 @@ public class SWorkers : SUnit
                 buildingGO.GetComponent<MeshFilter>().sharedMesh = mesh;
                 sbuilging.IndexOfConstructionMesh++; 
             }
-            print(gameObject.name + "is building");
             sbuilging.StateOfConstruction += (timeIteration / duration)* m_speedConstruction;
             yield return new WaitForSeconds(timeIteration);
         }
@@ -264,5 +287,8 @@ public class SWorkers : SUnit
         sbuilging.IsInConstruction = false;
         #endregion
     }
+
+    #endregion
+
 
 }

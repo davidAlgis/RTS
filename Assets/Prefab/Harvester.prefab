@@ -132,10 +132,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_belongsTo: {fileID: 0}
+  m_name: Workers
   m_isNeutral: 0
   m_radius: 1.5
   m_fieldType: 1
-  m_nbrUnitMaxOnObject: 4
   m_buttonCreation:
   - spriteButton: {fileID: 21300000, guid: 19e022486eba68a49b6fcf8c28d6c950, type: 3}
     sobject: {fileID: 304778352091325266, guid: 378f8697df5d83a4da69aa133da127ae,
@@ -157,10 +157,16 @@ MonoBehaviour:
           m_CallState: 2
   m_health: 100
   m_durationCreation: 5
+  m_costResources:
+    wood: 0
+    gold: 0
+    rock: 0
+    food: 100
   m_speedAttack: 1
   m_powerAttack: 25
   m_distanceMaxAttack: 2
   m_radiusAttack: 0.1
+  m_speedHarvest: 2
 --- !u!1001 &8846828404114518359
 PrefabInstance:
   m_ObjectHideFlags: 0

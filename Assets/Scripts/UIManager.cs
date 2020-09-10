@@ -9,18 +9,19 @@ public class UIManager : MonoBehaviour
     private static UIManager m_instance;
 
     [SerializeField]
-    private Canvas m_mainUICanvas;
+    private Canvas m_mainUICanvas = default;
 
     private GameObject[] m_creationButtonsGO = new GameObject[18];
     private Image[] m_creationButtonsImage = new Image[18];
     private GameObject m_queueButtonsPanel;
     private List<GameObject> m_creationQueueGO = new List<GameObject>();
     private GameObject m_buildingCreated = null;
+    private SBuilding m_sbuildingCreated;
     private GameObject m_defaultLineRendererGO;
     [SerializeField]
     private RawImage m_selectionImage;
 
-    Text[] m_textRessources;
+    Text[] m_textResources;
 
     public static UIManager Instance
     {
@@ -35,8 +36,8 @@ public class UIManager : MonoBehaviour
     }
 
     public GameObject BuildingCreated { get => m_buildingCreated; set => m_buildingCreated = value; }
-
     public GameObject DefaultLineRendererGO { get => m_defaultLineRendererGO; set => m_defaultLineRendererGO = value; }
+    public SBuilding SbuildingCreated { get => m_sbuildingCreated; set => m_sbuildingCreated = value; }
 
     private void Awake()
     {
@@ -67,16 +68,16 @@ public class UIManager : MonoBehaviour
         DebugTool.tryFindGOChildren(m_mainUICanvas.gameObject, "Panel/Ressources", out GameObject verticalLayoutRessourcesGO);
 
         const uint ressourcesCount = GameManager.m_ressourcesCount;
-        m_textRessources = new Text[ressourcesCount];
+        m_textResources = new Text[ressourcesCount];
 
         for (uint i=0; i< ressourcesCount; i++)
             if (DebugTool.tryFindGOChildren(verticalLayoutRessourcesGO, "RessourcesButton (" + i + ")/RessourcesButtonText (" + i + ")", out GameObject textGO))
-                if (textGO.TryGetComponent(out m_textRessources[i]) == false)
+                if (textGO.TryGetComponent(out m_textResources[i]) == false)
                     Debug.LogWarning("Unable to find any text component in " + textGO.name);
 
         DebugTool.tryFindGOChildren(m_mainUICanvas.gameObject, "Panel/CreationQueueButton", out m_queueButtonsPanel);
 
-        m_defaultLineRendererGO = Resources.Load("DefaultLineRenderer", typeof(GameObject)) as GameObject;
+        m_defaultLineRendererGO = UnityEngine.Resources.Load("DefaultLineRenderer", typeof(GameObject)) as GameObject;
 
         if (m_defaultLineRendererGO == null)
             Debug.LogWarning("Unable to load the DefaultLineRenderer");
@@ -124,6 +125,11 @@ public class UIManager : MonoBehaviour
                     {
                         SBuilding sbuilding = (SBuilding)sobject;
                         button.onClick.AddListener(() => sbuilding.addToQueue(creationButton));
+                    }
+                    else if(sobject is SWorkers)
+                    {
+                        button.onClick.AddListener(() => creationButton.method?.Invoke());
+
                     }
                     else
                         button.onClick.AddListener(() => creationButton.method?.Invoke());
@@ -208,10 +214,10 @@ public class UIManager : MonoBehaviour
 
     public void updateRessourcesCount(Player player)
     {
-        m_textRessources[0].text = "Food : " + player.Food.ToString();
-        m_textRessources[1].text = "Wood : " + player.Wood.ToString();
-        m_textRessources[2].text = "Gold : " + player.Gold.ToString();
-        m_textRessources[3].text = "Rock : " + player.Rock.ToString();
+        m_textResources[0].text = "Food : " + player.Resources.food;
+        m_textResources[1].text = "Wood : " + player.Resources.wood;
+        m_textResources[2].text = "Gold : " + player.Resources.gold;
+        m_textResources[3].text = "Rock : " + player.Resources.rock;
 
     }
 
@@ -229,12 +235,38 @@ public class UIManager : MonoBehaviour
         if (m_buildingCreated != null)
         {
             LayerMask mask = LayerMask.GetMask("Floor");
+            LayerMask maskSelectable = LayerMask.GetMask("Selectable");
+
             RaycastHit rayHit;
             if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out rayHit, Mathf.Infinity, mask))
             {
+
                 Vector3 point = rayHit.point;
+                //Is the construction possible ?
+                if (Utilities.isPositionAvailable2(m_buildingCreated, point, m_sbuildingCreated.Radius*0.5f))
+                {
+                    GameManager.Instance.CurrentPlayer.ConstructionIsAvailable = true;
+                    if (UIManager.Instance.BuildingCreated.TryGetComponent(out MeshRenderer meshRenderer))
+                        meshRenderer.material = GameManager.Instance.MatBuildingCreationAvailable;
+                    else
+                        Debug.LogWarning("Unable to find the material component of " + UIManager.Instance.BuildingCreated.name);
+                }
+                else
+                {
+                    GameManager.Instance.CurrentPlayer.ConstructionIsAvailable = false;
+                    if (UIManager.Instance.BuildingCreated.TryGetComponent(out MeshRenderer meshRenderer))
+                        meshRenderer.material = GameManager.Instance.MatBuildingCreationNotAvailable;
+                    else
+                        Debug.LogWarning("Unable to find the material component of " + UIManager.Instance.BuildingCreated.name);
+                }
+
                 m_buildingCreated.transform.position = new Vector3(point.x, m_buildingCreated.transform.position.y, point.z) ;
             }
+            
+                
+
+
+            
 
         }
 

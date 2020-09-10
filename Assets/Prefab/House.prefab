@@ -125,10 +125,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_belongsTo: {fileID: 0}
+  m_name: House
   m_isNeutral: 0
   m_radius: 7.5
   m_fieldType: 0
-  m_nbrUnitMaxOnObject: 4
   m_buttonCreation:
   - spriteButton: {fileID: 21300000, guid: f613bd9799d84694a871bbac0cfa213e, type: 3}
     sobject: {fileID: 3422678436820911440, guid: b3d52c0c6ab6e4645ae995471746475b,
@@ -149,7 +149,12 @@ MonoBehaviour:
             m_BoolArgument: 0
           m_CallState: 2
   m_health: 100
-  m_durationCreation: 5
+  m_durationCreation: 20
+  m_costResources:
+    wood: 100
+    gold: 0
+    rock: 0
+    food: 0
   m_stepConstructionMesh:
   - {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
   - {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}

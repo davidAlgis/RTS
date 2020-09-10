@@ -170,7 +170,7 @@ public class Utilities : MonoBehaviour
         int layerMask = ~(LayerMask.GetMask("Floor") | LayerMask.GetMask("Selectable"));
 
         var hitColliders = Physics.OverlapSphere(position, radius,layerMask);
-
+        
 
         if (hitColliders.Length > 0)
         {
@@ -179,6 +179,28 @@ public class Utilities : MonoBehaviour
         }
         else
             return true;
+    }
+
+    //Is there something else than the current object at the given position
+    public static bool isPositionAvailable2(GameObject go, Vector3 position, float radius)
+    {
+        int layerMask = ~(LayerMask.GetMask("Floor") | LayerMask.GetMask("Selectable"));
+
+        var hitColliders = Physics.OverlapSphere(position, radius, layerMask);
+
+
+        if (hitColliders.Length > 1)
+        {
+            print("hit :" + hitColliders[0].gameObject.name);
+            return false;
+        }
+        else if(hitColliders.Length == 1)
+        {
+            if (hitColliders[0].gameObject == go)
+                return true; 
+        }
+
+        return true;
     }
 
     

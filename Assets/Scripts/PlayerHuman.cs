@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 public class PlayerHuman : Player
 {
     private GameObject m_beginCreation = null;
-    private List<Squad> m_squadsList = new List<Squad>();
+    private bool m_constructionIsAvailable = true;
     private Squad m_currentSquad;
     private List<SObject> m_currentSelection = new List<SObject>();
     private SObject m_lastSelection;
@@ -27,6 +27,7 @@ public class PlayerHuman : Player
     public bool MouseIsHold { get => m_mouseIsHold; set => m_mouseIsHold = value; }
     public GameObject BeginCreation { get => m_beginCreation; set => m_beginCreation = value; }
     public bool EnableSelection { get => m_enableSelection; set => m_enableSelection = value; }
+    public bool ConstructionIsAvailable { get => m_constructionIsAvailable; set => m_constructionIsAvailable = value; }
     #endregion
 
     protected override void Awake()
@@ -74,7 +75,7 @@ public class PlayerHuman : Player
 
         if (m_beginCreation != null)
         {
-            if (Input.GetMouseButton(0))
+            if (Input.GetMouseButton(0) && m_constructionIsAvailable)
             {
                 /*this line must be before the next one, indeed if we call constructBuilding() 
                  * it will try to reach the destinationPoints which are set to 0 without this line*/
@@ -106,7 +107,6 @@ public class PlayerHuman : Player
 
         return true; 
     }
-
 
     private void select()
     {
@@ -186,8 +186,41 @@ public class PlayerHuman : Player
                 
             }
 
-            m_squadsList.Add(m_currentSquad);
+            if (needUpdateUI())
+                m_currentSelection[0].updateUI();
+            else
+                UIManager.Instance.setCreationButton(null, new List<CreationImprovement>());
+
         }
+    }
+
+    public bool needUpdateUI()
+    {
+        if (m_currentSelection.Count == 0)
+            return false;
+
+
+        System.Type sobjectRef = m_currentSelection[0].GetType();
+
+        if (m_currentSelection[0].BelongsTo == null || m_currentSelection[0].BelongsTo is PlayerEnnemy)
+            return false;
+
+        System.Type playerRef = m_currentSelection[0].BelongsTo.GetType();
+
+        for(int i = 1; i< m_currentSelection.Count; i++)
+        {
+            
+            if (m_currentSelection[i].GetType() != sobjectRef || m_currentSelection[i].BelongsTo.GetType() != playerRef)
+                return false;
+
+            if (m_currentSelection[i] is SWorkers == false)
+                return false;
+
+            if (m_currentSelection[0] is SWorkers == false)
+                return false;
+        }
+
+        return true;
     }
 
     public void removeFromCurrentSelection(SObject selectableObject)
@@ -223,7 +256,7 @@ public class PlayerHuman : Player
             }
 
             //if it belongs to the player we update the UI
-            sobject.updateUI();
+            //sobject.updateUI();
             sobject.setColorCursor(Color.blue);
         }    
         else if (sobject.BelongsTo is PlayerEnnemy)
@@ -237,7 +270,6 @@ public class PlayerHuman : Player
         m_currentSelection.Add(sobject);
     }
     #endregion
-
     private void actionCurrentSelection(RaycastHit rayHit)
     {
         if (m_currentSelection != null)

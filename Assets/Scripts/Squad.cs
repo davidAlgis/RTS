@@ -191,4 +191,20 @@ public class Squad
     }
 
     #endregion
+
+    #region creationBuilding
+
+    public void constructBuilding(GameObject buildingGO)
+    {
+        foreach(SMovable smovable in m_squadSMovable)
+        {
+            if(smovable is SWorkers)
+            {
+                SWorkers sworkers = (SWorkers)smovable;
+                sworkers.constructBuilding(buildingGO);
+            }
+        }
+    }
+
+    #endregion
 }

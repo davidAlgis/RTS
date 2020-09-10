@@ -22,7 +22,7 @@ public class SMovable : SObject
     protected float m_distanceMaxAttack;
     [SerializeField]
     protected float m_radiusAttack;
-    private Squad m_belongsToSquad;
+    protected Squad m_belongsToSquad;
 
     public NavMeshAgent Agent { get => m_agent; set => m_agent = value; }
     public Squad BelongsToSquad { get => m_belongsToSquad;}
@@ -220,7 +220,7 @@ public class SMovable : SObject
                 yield break;
             }
 
-            if(moveOneToSObject(target) == false);
+            if(moveOneToSObject(target) == false)
                 Agent.destination = dest;
 
             if (target == null)

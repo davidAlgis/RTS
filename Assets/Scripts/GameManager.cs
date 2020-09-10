@@ -5,13 +5,15 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     [SerializeField]
-    private Player m_currentPlayer;
+    private PlayerHuman m_currentPlayer;
 
     private static GameManager m_instance;
     private Neutral m_neutral = new Neutral();
     public const uint m_ressourcesCount = 4;
     [SerializeField]
-    private Material m_matBuildingCreation;
+    private Material m_matBuildingCreationAvailable;
+    [SerializeField]
+    private Material m_matBuildingCreationNotAvailable;
     private LayerMask m_layerSelection;
     public static GameManager Instance
     {
@@ -26,9 +28,10 @@ public class GameManager : MonoBehaviour
     }
 
     public Neutral Neutral { get => m_neutral; set => m_neutral = value; }
-    public Player CurrentPlayer { get => m_currentPlayer; set => m_currentPlayer = value; }
-    public Material MatBuildingCreation { get => m_matBuildingCreation; set => m_matBuildingCreation = value; }
+    public PlayerHuman CurrentPlayer { get => m_currentPlayer; set => m_currentPlayer = value; }
+    public Material MatBuildingCreationAvailable { get => m_matBuildingCreationAvailable; set => m_matBuildingCreationAvailable = value; }
     public LayerMask LayerSelection { get => m_layerSelection; set => m_layerSelection = value; }
+    public Material MatBuildingCreationNotAvailable { get => m_matBuildingCreationNotAvailable; set => m_matBuildingCreationNotAvailable = value; }
 
     public void Awake()
     {
@@ -40,4 +43,5 @@ public class GameManager : MonoBehaviour
         
         UIManager.Instance.updateRessourcesCount(m_currentPlayer);
     }
+
 }

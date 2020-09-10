@@ -56,6 +56,10 @@ public class SBuilding : SUnmovable
 
     public void addToQueue(CreationImprovement buttonImage)
     {
+
+        if (m_belongsTo.canBuySobject(buttonImage.sobject) == false)
+            return;
+
         m_queueCreation.Enqueue(buttonImage);
         UIManager.Instance.addQueueButton(buttonImage);
         if (m_creationOnGoing == false)
@@ -77,9 +81,39 @@ public class SBuilding : SUnmovable
             return;
         }
 
+        
         sunit.BelongsTo = GameManager.Instance.CurrentPlayer;
-        //TODO set a spawn point
-        Instantiate(sunitGO, PointsDestinationNavMesh[0], Quaternion.identity);
+
+        /*if (sunit.BelongsTo.canBuySobject(sunit) == false)
+            return;*/
+       /* if (SObject.canBuy(sunit) == false)
+            return;*/
+
+
+        Vector3 spawn = lookForASpawnPoint(sunit);
+        Instantiate(sunitGO, spawn, Quaternion.identity);
+    }
+
+    //define the spawn position of the unit which is created.
+    private Vector3 lookForASpawnPoint(SUnit sunit)
+    {
+        Vector3 pos;
+        for (float z=0.0f;z>-20.0f;z-= sunit.Radius)
+        {
+            pos = new Vector3(PointsDestinationNavMesh[0].x, PointsDestinationNavMesh[0].y, PointsDestinationNavMesh[0].z + z);
+            if (Utilities.isPositionAvailable(pos, sunit.Radius))
+                return pos;
+        }
+
+        for (float x = 0.0f; x > 20.0f; x += sunit.Radius)
+        {
+            pos = new Vector3(PointsDestinationNavMesh[0].x + x, PointsDestinationNavMesh[0].y, PointsDestinationNavMesh[0].z);
+            if (Utilities.isPositionAvailable(pos, sunit.Radius))
+                return pos;
+        }
+
+        Debug.LogWarning("Unable to find an available position to spawn " + sunit.gameObject.name);
+        return PointsDestinationNavMesh[0];
     }
 
     IEnumerator treatQueue()

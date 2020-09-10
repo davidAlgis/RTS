@@ -11,7 +11,8 @@ public class SObject : MonoBehaviour
     private LineRenderer m_lineRenderer;
     [SerializeField]
     protected Player m_belongsTo;
-    protected string m_name;
+    [SerializeField]
+    private string m_name = "";
     [SerializeField]
     private bool m_isNeutral = false;
     private string m_ID;
@@ -22,19 +23,18 @@ public class SObject : MonoBehaviour
     protected float m_radius = 0f;
     private List<Vector3> m_pointsDestionationNavMesh = new List<Vector3>();
     [SerializeField]
-    private FieldSelection m_fieldType;
-    [SerializeField]
-    protected uint m_nbrUnitMaxOnObject = 4;
-    protected uint m_nbrUnitOnObject = 0;
+    private FieldSelection m_fieldType = FieldSelection.circle;
     [SerializeField]
     protected List<CreationImprovement> m_buttonCreation = new List<CreationImprovement>();
-    protected CreationImprovement m_currentButtonCreation;
+    private CreationImprovement m_currentButtonCreation;
     [SerializeField]
     private uint m_health = 100;
     [SerializeField]
     private float m_durationCreation = 0.0f;
+    [SerializeField]
+    private Resources m_costResources = new Resources();
 
-    #region getter
+    #region getter-setter
     public Player BelongsTo { get => m_belongsTo; set => m_belongsTo = value; }
     public List<Vector3> PointsDestinationNavMesh { get => m_pointsDestionationNavMesh; set => m_pointsDestionationNavMesh = value; }
     public bool IsNeutral { get => m_isNeutral; set => m_isNeutral = value; }
@@ -42,8 +42,8 @@ public class SObject : MonoBehaviour
     public uint Health { get => m_health; }
     public float DurationCreation { get => m_durationCreation; set => m_durationCreation = value; }
     public float Radius { get => m_radius; set => m_radius = value; }
+    public Resources CostResources { get => m_costResources; set => m_costResources = value; }
     #endregion
-
 
 
     protected virtual void Awake()
@@ -64,13 +64,119 @@ public class SObject : MonoBehaviour
         m_cursorGO.SetActive(false);
     }
 
-    public void Start()
+    private void Start()
     {
         /*this function has to be executed in start, because 
-         * it have to wait the load ressources of UIManager in his awake*/
+         * it have to wait the load resources of UIManager in his awake*/
         defineSelectionField(); 
     }
 
+    protected virtual bool checkCoherency()
+    {
+        bool coherency = true;
+        if (m_isNeutral && m_belongsTo != null)
+        {
+            Debug.LogWarning(gameObject.name + " is neutral but belongs to " + m_belongsTo.gameObject.name);
+            Debug.LogWarning("We set it to neutral by default");
+            m_belongsTo = null;
+            coherency = false;
+        }
+
+        if (m_isNeutral == false && m_belongsTo == null)
+        {
+            Debug.LogWarning(gameObject.name + " isn't neutral and doesn't belongs any Player");
+            Debug.LogWarning("We set it to neutral by default");
+            m_isNeutral = true;
+            coherency = false;
+        }
+
+
+        if (m_radius == 0.0f)
+            Debug.LogWarning("The radius of " + gameObject.name + " is set to 0");
+
+        return coherency;
+    }
+
+    private uint updateNbrOfSobject()
+    {
+        if (m_isNeutral)
+            return GameManager.Instance.Neutral.NbrSObject++;
+        else
+            return m_belongsTo.NbrSObject++;
+    }
+
+    private void defineID()
+    {
+        if (m_isNeutral)
+            m_ID = m_name + "_Neutral_" + GameManager.Instance.Neutral.NbrSObject;
+        else
+            m_ID = m_name + "_" + m_belongsTo.gameObject + "_" + m_belongsTo.NbrSObject;
+
+    }
+
+    public void definePointsDestination()
+    {
+        float greaterRadius = m_radius + 0.5f;
+        float x;
+
+        m_pointsDestionationNavMesh.Clear();
+        switch (m_fieldType)
+        {
+            case FieldSelection.circle:
+
+                for (x = 0.0f; x < 2 * Mathf.PI; x += 2.0f)
+                {
+                    Vector3 pos = new Vector3(transform.position.x + greaterRadius * Mathf.Cos(x), 0.01f, transform.position.z + greaterRadius * Mathf.Sin(x));
+
+                    //With the last element we check if it isn't too close of the first one.
+                    if (x + 2.0f > 2 * Mathf.PI)
+                        if (m_pointsDestionationNavMesh.Count > 1)
+                            if (Vector3.Distance(pos, m_pointsDestionationNavMesh[0]) < 2.0f)
+                                break;
+
+                    m_pointsDestionationNavMesh.Add(pos);
+                }
+
+                break;
+            case FieldSelection.square:
+
+                //pythagore
+                float length = Mathf.Sqrt(2 * greaterRadius * greaterRadius);
+                //right
+                for (x = 2.0f; x < length - 2.0f; x += 2.0f)
+                {
+                    Vector3 pos = new Vector3(transform.position.x + length / 2.0f, 0.01f, transform.position.z - length / 2.0f + x);
+                    m_pointsDestionationNavMesh.Add(pos);
+                }
+                //up
+                for (x = 0.0f; x < length; x += 2.0f)
+                {
+                    Vector3 pos = new Vector3(transform.position.x - length / 2.0f + x, 0.01f, transform.position.z + length / 2.0f);
+                    m_pointsDestionationNavMesh.Add(pos);
+                }
+                //left
+                for (x = 2.0f; x < length - 2.0f; x += 2.0f)
+                {
+                    Vector3 pos = new Vector3(transform.position.x - length / 2.0f, 0.01f, transform.position.z - length / 2.0f + x);
+                    m_pointsDestionationNavMesh.Add(pos);
+                }
+                //bottom
+                for (x = 0.0f; x < length; x += 2.0f)
+                {
+                    Vector3 pos = new Vector3(transform.position.x - length / 2.0f + x, 0.01f, transform.position.z - length / 2.0f);
+                    m_pointsDestionationNavMesh.Add(pos);
+                }
+
+                break;
+            default:
+                Debug.LogWarning("Unknown FieldSelectionType for " + gameObject.name);
+                break;
+
+        }
+
+    }
+
+    #region selection
     public void defineSelectionField()
     {
         if(UIManager.Instance.DefaultLineRendererGO == null)
@@ -123,115 +229,11 @@ public class SObject : MonoBehaviour
         m_currentButtonCreation = creationImprovement;
     }
 
-    private uint updateNbrOfSobject()
-    {
-        if (m_isNeutral)
-            return GameManager.Instance.Neutral.NbrSObject++;
-        else
-            return m_belongsTo.NbrSObject++;
-    }
-
-    protected virtual bool checkCoherency()
-    {
-        bool coherency = true;
-        if(m_isNeutral && m_belongsTo != null)
-        {
-            Debug.LogWarning(gameObject.name + " is neutral but belongs to " + m_belongsTo.gameObject.name);
-            Debug.LogWarning("We set it to neutral by default");
-            m_belongsTo = null;
-            coherency = false;
-        }
-
-        if (m_isNeutral == false && m_belongsTo == null)
-        {
-            Debug.LogWarning(gameObject.name + " isn't neutral and doesn't belongs any Player");
-            Debug.LogWarning("We set it to neutral by default");
-            m_isNeutral = true;
-            coherency = false;
-        }
-
-
-        if (m_radius == 0.0f)
-            Debug.LogWarning("The radius of " + gameObject.name + " is set to 0");
-        
-        return coherency;
-    }
-
     public void setColorCursor(Color color)
     {
         m_lineRenderer.startColor = color;
         m_lineRenderer.endColor = color;
         m_cursorRenderer.material.SetColor("_Color", color);
-    }
-
-    private void defineID()
-    {
-        if (m_isNeutral)
-            m_ID = m_name + "_Neutral_" + GameManager.Instance.Neutral.NbrSObject;
-        else
-            m_ID = m_name + "_" + m_belongsTo.gameObject + "_" + m_belongsTo.NbrSObject; 
-            
-    }
-
-    public void definePointsDestination()
-    {
-        float greaterRadius = m_radius + 0.5f;
-        float x;
-
-        switch (m_fieldType)
-        {
-            case FieldSelection.circle:
-
-                for(x = 0.0f; x<2*Mathf.PI; x+=2.0f)
-                {
-                    Vector3 pos = new Vector3(transform.position.x + greaterRadius * Mathf.Cos(x), 0.01f, transform.position.z + greaterRadius * Mathf.Sin(x));
-
-                    //With the last element we check if it isn't too close of the first one.
-                    if (x + 2.0f > 2 * Mathf.PI)
-                        if (m_pointsDestionationNavMesh.Count > 1)
-                            if (Vector3.Distance(pos, m_pointsDestionationNavMesh[0]) < 2.0f)
-                                break;
-
-                    m_pointsDestionationNavMesh.Add(pos);
-                }
-
-                break;
-            case FieldSelection.square:
-
-                //pythagore
-                float length = Mathf.Sqrt(2 * greaterRadius * greaterRadius);
-                //right
-                for (x = 2.0f; x < length - 2.0f; x += 2.0f)
-                {
-                    Vector3 pos = new Vector3(transform.position.x + length / 2.0f, 0.01f, transform.position.z - length / 2.0f + x);
-                    m_pointsDestionationNavMesh.Add(pos);
-                }
-                //up
-                for (x = 0.0f; x < length; x += 2.0f)
-                {
-                    Vector3 pos = new Vector3(transform.position.x - length/2.0f + x, 0.01f, transform.position.z + length / 2.0f);
-                    m_pointsDestionationNavMesh.Add(pos);
-                }
-                //left
-                for (x = 2.0f; x < length - 2.0f; x += 2.0f)
-                {
-                    Vector3 pos = new Vector3(transform.position.x - length / 2.0f, 0.01f, transform.position.z - length / 2.0f + x);
-                    m_pointsDestionationNavMesh.Add(pos);
-                }
-                //bottom
-                for (x = 0.0f; x < length; x += 2.0f)
-                {
-                    Vector3 pos = new Vector3(transform.position.x - length / 2.0f + x, 0.01f, transform.position.z - length / 2.0f);
-                    m_pointsDestionationNavMesh.Add(pos);
-                }
-
-                break;
-            default:
-                Debug.LogWarning("Unknown FieldSelectionType for " + gameObject.name);
-                break;
-
-        }
-
     }
 
     public static SObject getSobjectFromSelectionField(GameObject selectionFieldGO)
@@ -259,12 +261,9 @@ public class SObject : MonoBehaviour
         m_cursorGO.SetActive(false);
     }
 
-    public virtual void onClick(RaycastHit rayHit)
-    {
+    #endregion
 
-    }
-
-
+    public virtual void onClick(RaycastHit rayHit){}
 
     public bool damage(uint damage)
     {
@@ -288,6 +287,22 @@ public class SObject : MonoBehaviour
         else
             UIManager.Instance.setCreationButton(this, m_buttonCreation, false);
     }
+
+    //check if it can buy the sobject ressources.
+    public static bool canBuy(SObject sobject)
+    {
+        if (sobject.BelongsTo.Resources < sobject.CostResources)
+        {
+            print("Player has not enough money to buy the " + sobject.ID);
+            return false;
+        }
+        else
+        {
+            sobject.BelongsTo.Resources -= sobject.CostResources;
+            return true;
+        }
+    }
+
 }
 
 public enum FieldSelection
@@ -296,20 +311,15 @@ public enum FieldSelection
     circle
 }
 
-public enum Agent
-{
-    player, 
-    ennemy,
-    neutral
-}
+
 
 [System.Serializable]
 public struct CreationImprovement
 {
     public Sprite spriteButton;
-    //public float duration;
     public SObject sobject;
     //the methods used here can only have less than 2 parameters.
     public UnityEvent method;
+
 
 }

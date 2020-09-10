@@ -5,46 +5,31 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     [SerializeField]
-    private uint m_wood;
-    [SerializeField]
-    private uint m_rock;
-    [SerializeField]
-    private uint m_gold;
-    [SerializeField]
-    private uint m_food;
-    private uint m_nbrSObject = 0;
-    public uint Wood { get => m_wood; set => m_wood = value; }
-    public uint Rock { get => m_rock; set => m_rock = value; }
-    public uint Gold { get => m_gold; set => m_gold = value; }
-    public uint Food { get => m_food; set => m_food = value; }
-    public uint NbrSObject { get => m_nbrSObject; set => m_nbrSObject = value; }
+    private Resources m_resources = new Resources();
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    private uint m_nbrSObject = 0;
+
+    public uint NbrSObject { get => m_nbrSObject; set => m_nbrSObject = value; }
+    public Resources Resources { get => m_resources; set => m_resources = value; }
+
 
     protected virtual void Awake()
     {
-        initRessources();
 
     }
 
-    protected virtual void initRessources()
+    public bool canBuySobject(SObject sobject)
     {
-        m_food = 100;
-        m_gold = 100;
-        m_wood = 100;
-        m_rock = 100;
-
+        if (m_resources < sobject.CostResources)
+        {
+            print("Player has not enough money to buy the " + sobject.ID);
+            return false;
+        }
+        else
+        {
+            m_resources -= sobject.CostResources;
+            return true;
+        }
     }
 }
 
-public enum RessourcesType
-{
-    wood,
-    gold,
-    rock,
-    food
-}
