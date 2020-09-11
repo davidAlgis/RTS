@@ -41,7 +41,7 @@ public class SMovable : SObject
 
     public override void onClick(RaycastHit rayHit)
     {
-        StopAllCoroutines();
+        base.onClick(rayHit);
         moveTo(rayHit);
         attack(rayHit);
     }

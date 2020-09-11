@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 [System.Serializable]
@@ -76,6 +77,7 @@ public class Resources
     #region overloadOperator
     public static Resources operator -(Resources r1, uint x)
     {
+        Resources result = new Resources();
         if (r1 == null)
         {
             Debug.LogWarning("Unable to add resources and uint, because the resources isn't set.");
@@ -83,88 +85,130 @@ public class Resources
         }
 
         if (r1.wood >= x)
-            r1.wood -= x;
+            result.wood = r1.wood - x;
         else
-            r1.wood = 0;
+            result.wood = 0;
 
         if (r1.food >= x)
-            r1.food -= x;
+            result.food = r1.food - x;
         else
-            r1.food = 0;
+            result.food = 0;
 
         if (r1.gold >= x)
-            r1.gold -= x;
+            result.gold = r1.gold - x;
         else
-            r1.gold = 0;
+            result.gold = 0;
 
         if (r1.rock >= x)
-            r1.rock -= x;
+            result.rock = r1.rock - x;
         else
-            r1.rock = 0;
+            result.rock = 0;
 
-        return r1;
+        return result;
     }
 
     public static Resources operator +(Resources r1, uint x)
     {
+        Resources result = new Resources();
         if (r1 == null)
         {
             Debug.LogWarning("Unable to add resources and uint, because the resources isn't set.");
-            return new Resources();
+            return result;
         }
-        r1.wood += x;
-        r1.food += x;
-        r1.gold += x;
-        r1.rock += x;
+        result.wood = r1.wood + x;
+        result.food = r1.food + x;
+        result.gold = r1.gold + x;
+        result.rock = r1.rock + x;
+
+        return result;
+    }
+
+    public static Resources operator /(Resources r1, float x)
+    {
+        Resources result = new Resources();
+        if (r1 == null)
+        {
+            Debug.LogWarning("Unable to add resources and uint, because the resources isn't set.");
+            return result;
+        }
+
+        if(x==0)
+        {
+            Debug.LogWarning("Try to divide by 0");
+            return result;
+        }
+
+        result.wood = (uint)((float)r1.wood / x);
+        result.food = (uint)((float)r1.food / x);
+        result.gold = (uint)((float)r1.gold / x);
+        result.rock = (uint)((float)r1.rock / x);
 
         return r1;
+    }
+
+    public static Resources operator *(Resources r1, float x)
+    {
+        Resources result = new Resources();
+        if (r1 == null)
+        {
+            Debug.LogWarning("Unable to add resources and uint, because the resources isn't set.");
+            return result;
+        }
+
+        result.wood = (uint)((float)r1.wood * x);
+        result.food = (uint)((float)r1.food * x);
+        result.gold = (uint)((float)r1.gold * x);
+        result.rock = (uint)((float)r1.rock * x);
+        return result;
     }
 
     public static Resources operator +(Resources r1, Resources r2)
     {
-        if(r1 == null || r2 == null)
+        Resources result = new Resources();
+        if (r1 == null || r2 == null)
         {
             Debug.LogWarning("Unable to add two resources, because one/two of them isn't set.");
-            return new Resources();
+            return result;
         }
 
-        r1.wood += r2.wood;
-        r1.food += r2.food;
-        r1.gold += r2.gold;
-        r1.rock += r2.rock;
+        result.wood = r1.wood + r2.wood;
+        result.food = r1.food + r2.food;
+        result.gold = r1.gold + r2.gold;
+        result.rock = r1.rock + r2.rock;
 
-        return r1;
+        return result;
     }
 
     public static Resources operator -(Resources r1, Resources r2)
     {
+        Resources result = new Resources();
         if (r1 == null || r2 == null)
         {
             Debug.LogWarning("Unable to add two resources, because one/two of them isn't set.");
-            return new Resources();
+            return result;
         }
 
         if (r1.wood >= r2.wood)
-            r1.wood -= r2.wood;
+            result.wood = r1.wood - r2.wood;
         else
-            r1.wood = 0;
+            result.wood = 0;
 
         if (r1.food >= r2.food)
-            r1.food -= r2.food;
+            result.food = r1.food - r2.food;
         else
-            r1.food = 0;
+            result.food = 0;
 
         if (r1.gold >= r2.gold)
-            r1.gold -= r2.gold;
+            result.gold = r1.gold - r2.gold;
         else
-            r1.gold = 0;
+            result.gold = 0;
 
         if (r1.rock >= r2.rock)
-            r1.rock -= r2.rock;
+            result.rock = r1.rock - r2.rock;
         else
-            r1.rock = 0;
+            result.rock = 0;
 
-        return r1;
+        return result;
     }
 
     public static bool operator==(Resources r1, Resources r2)
@@ -190,7 +234,10 @@ public class Resources
 
     public static bool operator <(Resources r1, Resources r2)
     {
-        return !(r1 > r2);
+        if ((object)r1 == null)
+            return (object)r2 == null;
+
+        return r1.wood < r2.wood && r1.food < r2.food && r1.gold < r2.gold && r1.rock < r2.rock;
     }
 
     public static bool operator >=(Resources r1, Resources r2)

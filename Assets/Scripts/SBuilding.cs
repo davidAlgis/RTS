@@ -80,15 +80,8 @@ public class SBuilding : SUnmovable
             Debug.LogError("Building try to create something else than a sunit");
             return;
         }
-
         
         sunit.BelongsTo = GameManager.Instance.CurrentPlayer;
-
-        /*if (sunit.BelongsTo.canBuySobject(sunit) == false)
-            return;*/
-       /* if (SObject.canBuy(sunit) == false)
-            return;*/
-
 
         Vector3 spawn = lookForASpawnPoint(sunit);
         Instantiate(sunitGO, spawn, Quaternion.identity);

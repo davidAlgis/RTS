@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.UIElements;
+using UnityEngine.UI;
 
 public class SObject : MonoBehaviour
 {
@@ -28,7 +28,10 @@ public class SObject : MonoBehaviour
     protected List<CreationImprovement> m_buttonCreation = new List<CreationImprovement>();
     private CreationImprovement m_currentButtonCreation;
     [SerializeField]
+    private Sprite m_representation = null;
+    [SerializeField]
     private uint m_health = 100;
+    private uint m_totalHealth;
     [SerializeField]
     private float m_durationCreation = 0.0f;
     [SerializeField]
@@ -43,6 +46,10 @@ public class SObject : MonoBehaviour
     public float DurationCreation { get => m_durationCreation; set => m_durationCreation = value; }
     public float Radius { get => m_radius; set => m_radius = value; }
     public Resources CostResources { get => m_costResources; set => m_costResources = value; }
+    public LineRenderer LineRenderer { get => m_lineRenderer; set => m_lineRenderer = value; }
+    public Sprite Representation { get => m_representation; set => m_representation = value; }
+    public uint TotalHealth { get => m_totalHealth; set => m_totalHealth = value; }
+    public string Name { get => m_name; set => m_name = value; }
     #endregion
 
 
@@ -62,6 +69,8 @@ public class SObject : MonoBehaviour
         if (m_cursorGO.TryGetComponent(out m_cursorRenderer) == false)
             Debug.LogWarning("Unable to find any renderer component on cursor of " + gameObject.name);
         m_cursorGO.SetActive(false);
+
+        m_totalHealth = m_health;
     }
 
     private void Start()
@@ -93,6 +102,12 @@ public class SObject : MonoBehaviour
 
         if (m_radius == 0.0f)
             Debug.LogWarning("The radius of " + gameObject.name + " is set to 0");
+
+        if(m_representation == null)
+        {
+            Debug.LogWarning("The image for reprensation of " + m_ID + " isn't set.");
+            coherency = false;
+        }
 
         return coherency;
     }
@@ -229,7 +244,21 @@ public class SObject : MonoBehaviour
         m_currentButtonCreation = creationImprovement;
     }
 
-    public void setColorCursor(Color color)
+    public void defineColorSObject(Player player)
+    {
+        if (m_belongsTo == player)
+            setColor(Color.blue);
+        else if (m_belongsTo is PlayerEnnemy)
+            setColor(Color.red);
+        else if (m_isNeutral == true)
+            setColor(Color.grey);
+        else
+            Debug.LogWarning("Unknown belonging for " + ID + " cannot set color of cursor");
+
+        
+    }
+
+    private void setColor(Color color)
     {
         m_lineRenderer.startColor = color;
         m_lineRenderer.endColor = color;
@@ -263,7 +292,17 @@ public class SObject : MonoBehaviour
 
     #endregion
 
-    public virtual void onClick(RaycastHit rayHit){}
+    public virtual void onClick(RaycastHit rayHit)
+    {
+
+        StopAllCoroutines();
+        if (rayHit.collider.gameObject.layer == LayerMask.NameToLayer("Selectable"))
+        {
+            SObject sobject = SObject.getSobjectFromSelectionField(rayHit.collider.gameObject);
+            UIManager.Instance.blinkSelectionField(sobject);
+        }
+
+    }
 
     public bool damage(uint damage)
     {

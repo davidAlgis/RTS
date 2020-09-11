@@ -148,6 +148,7 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+  m_representation: {fileID: 21300000, guid: 19e022486eba68a49b6fcf8c28d6c950, type: 3}
   m_health: 100
   m_durationCreation: 20
   m_costResources:

@@ -185,12 +185,7 @@ public class PlayerHuman : Player
                 m_boxForSelection.enabled = false;
                 
             }
-
-            if (needUpdateUI())
-                m_currentSelection[0].updateUI();
-            else
-                UIManager.Instance.setCreationButton(null, new List<CreationImprovement>());
-
+            updateUIForSelection();
         }
     }
 
@@ -223,6 +218,18 @@ public class PlayerHuman : Player
         return true;
     }
 
+    public void updateUIForSelection()
+    {
+        if (needUpdateUI())
+        {
+            UIManager.Instance.enableDisableIDSObject();
+            UIManager.Instance.setIDSObject(m_currentSelection[0]);
+            m_currentSelection[0].updateUI();
+        }
+        else
+            UIManager.Instance.setCreationButton(null, new List<CreationImprovement>());
+    }
+
     public void removeFromCurrentSelection(SObject selectableObject)
     {
         if(m_currentSelection.Contains(selectableObject))
@@ -234,11 +241,13 @@ public class PlayerHuman : Player
 
     private void cleanCurrentSelection()
     {
+
         if(m_currentSelection != null)
             foreach(SObject selectableObject in m_currentSelection)
                 selectableObject.unSelect();
 
         m_currentSquad = null;
+        UIManager.Instance.enableDisableIDSObject(false);
         m_currentSelection.Clear();
     }
 
@@ -254,21 +263,13 @@ public class PlayerHuman : Player
                 SMovable smovable = (SMovable)sobject;
                 smovable.setBelongsSquad(m_currentSquad);
             }
-
-            //if it belongs to the player we update the UI
-            //sobject.updateUI();
-            sobject.setColorCursor(Color.blue);
         }    
-        else if (sobject.BelongsTo is PlayerEnnemy)
-            sobject.setColorCursor(Color.red);
-        else if (sobject.IsNeutral == true)
-            sobject.setColorCursor(Color.grey);
-        else
-            Debug.LogWarning("Unknown belonging for " + sobject.ID + " cannot set color of cursor");
 
+        sobject.defineColorSObject(this);
         sobject.isSelect();
         m_currentSelection.Add(sobject);
     }
+
     #endregion
     private void actionCurrentSelection(RaycastHit rayHit)
     {

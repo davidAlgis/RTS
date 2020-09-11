@@ -155,6 +155,7 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+  m_representation: {fileID: 21300000, guid: f613bd9799d84694a871bbac0cfa213e, type: 3}
   m_health: 100
   m_durationCreation: 5
   m_costResources:

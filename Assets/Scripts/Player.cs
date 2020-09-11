@@ -13,10 +13,7 @@ public class Player : MonoBehaviour
     public Resources Resources { get => m_resources; set => m_resources = value; }
 
 
-    protected virtual void Awake()
-    {
-
-    }
+    protected virtual void Awake(){}
 
     public bool canBuySobject(SObject sobject)
     {

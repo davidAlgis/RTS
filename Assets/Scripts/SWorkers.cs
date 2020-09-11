@@ -37,12 +37,19 @@ public class SWorkers : SUnit
             if (sobject is SResources)
             {
                 print("gonna to harvest " + ID);
-                StartCoroutine(actionGetRessourcesCoroutine((SResources)sobject));
+                SResources sresources = (SResources)sobject;
+                actionGetResources(sresources);
+                m_belongsToSquad.harvestSquad(sresources);
             }
         }
     }
 
-    IEnumerator actionGetRessourcesCoroutine(SResources sresources)
+    public void actionGetResources(SResources sresources)
+    {
+        StartCoroutine(actionGetResourcesCoroutine(sresources));
+    }
+
+    private IEnumerator actionGetResourcesCoroutine(SResources sresources)
     {
         int i = 0;
         while(Utilities.navMeshHaveReachDestination(m_agent) == false)
@@ -64,8 +71,7 @@ public class SWorkers : SUnit
             
             yield return new WaitForSeconds(m_speedHarvest);
             Resources resources = sresources.getResources(10);
-            print("get " + resources.ToString() + " resources");
-
+            print("rest " + sresources.Contains);
             if (IsNeutral == false)
                 m_belongsTo.Resources += resources;
 
@@ -103,7 +109,9 @@ public class SWorkers : SUnit
                         continueConstructBuilding(sbuilding.gameObject);
                 }
             }
+
         }
+
     }
 
     public void beginCreateBuilding(GameObject buildingGO)

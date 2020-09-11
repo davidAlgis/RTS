@@ -20,8 +20,10 @@ public class UIManager : MonoBehaviour
     private GameObject m_defaultLineRendererGO;
     [SerializeField]
     private RawImage m_selectionImage;
-
-    Text[] m_textResources;
+    private Image m_sobjectRepresentation;
+    private Text m_sobjectName;
+    private Text m_sobjectHealth;
+    private Text[] m_textResources;
 
     public static UIManager Instance
     {
@@ -81,6 +83,25 @@ public class UIManager : MonoBehaviour
 
         if (m_defaultLineRendererGO == null)
             Debug.LogWarning("Unable to load the DefaultLineRenderer");
+
+        GameObject IDSobjectGO;
+        if (DebugTool.tryFindGOChildren(m_mainUICanvas.gameObject, "Panel/IDSobject", out IDSobjectGO))
+        {
+            DebugTool.tryFindGOChildren(IDSobjectGO, "SObjectName", out GameObject sobjectNameGO);
+            if(sobjectNameGO.TryGetComponent(out m_sobjectName) == false)
+                Debug.LogWarning("Unable to find any text component in " + sobjectNameGO.name);
+
+            DebugTool.tryFindGOChildren(IDSobjectGO, "SObjectHealth", out GameObject sobjectHealthGO);
+            if (sobjectHealthGO.TryGetComponent(out m_sobjectHealth) == false)
+                Debug.LogWarning("Unable to find any text component in " + sobjectHealthGO.name);
+
+            DebugTool.tryFindGOChildren(IDSobjectGO, "SObjectRepresentation", out GameObject sobjectRepresentationGO);
+            if (sobjectRepresentationGO.TryGetComponent(out m_sobjectRepresentation) == false)
+                Debug.LogWarning("Unable to find any text component in " + sobjectRepresentationGO.name);
+        }
+
+
+        enableDisableIDSObject(false);
     }
 
     public void plotSelector(Vector3 extremity1, Vector3 extremity2)
@@ -164,6 +185,26 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    public void setIDSObject(SObject sobject)
+    {
+        if(sobject.Representation != null)
+            m_sobjectRepresentation.sprite = sobject.Representation;
+        
+        if (sobject.name == "")
+            m_sobjectName.text = "Unkwown Name";
+        else
+            m_sobjectName.text = sobject.Name;
+
+        m_sobjectHealth.text = sobject.Health + " / " + sobject.TotalHealth;
+    }
+
+    public void enableDisableIDSObject(bool enable = true)
+    {
+        m_sobjectRepresentation.enabled = enable;
+        m_sobjectName.enabled = enable;
+        m_sobjectHealth.enabled = enable;
+    }
+
     public void setDefaultCreationButton()
     {
         for (int i = 0; i < 18; i++)
@@ -230,8 +271,30 @@ public class UIManager : MonoBehaviour
         return results.Count > 0;
     }
 
+    public void blinkSelectionField(SObject sobject)
+    {
+        sobject.defineColorSObject(GameManager.Instance.CurrentPlayer);
+        StartCoroutine(blinkSelectionFieldCoroutine(sobject));
+    }
+
+    private IEnumerator blinkSelectionFieldCoroutine(SObject sobject)
+    {
+        
+        sobject.LineRenderer.enabled = true;
+        yield return new WaitForSeconds(0.2f);
+        sobject.LineRenderer.enabled = false;
+        yield return new WaitForSeconds(0.2f);
+        sobject.LineRenderer.enabled = true;
+        yield return new WaitForSeconds(0.2f);
+        sobject.LineRenderer.enabled = false;
+    }
+
     public void Update()
     {
+        updateRessourcesCount(GameManager.Instance.CurrentPlayer);
+
+
+        #region construction 
         if (m_buildingCreated != null)
         {
             LayerMask mask = LayerMask.GetMask("Floor");
@@ -263,12 +326,7 @@ public class UIManager : MonoBehaviour
                 m_buildingCreated.transform.position = new Vector3(point.x, m_buildingCreated.transform.position.y, point.z) ;
             }
             
-                
-
-
-            
-
         }
-
+        #endregion
     }
 }

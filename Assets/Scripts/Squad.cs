@@ -207,4 +207,20 @@ public class Squad
     }
 
     #endregion
+
+    #region harvest
+
+    public void harvestSquad(SResources sresources)
+    {
+        foreach (SMovable smovable in m_squadSMovable)
+        {
+            if (smovable is SWorkers)
+            {
+                SWorkers sworkers = (SWorkers)smovable;
+                sworkers.actionGetResources(sresources);
+            }
+        }
+    }
+
+    #endregion
 }

@@ -38,10 +38,5 @@ public class GameManager : MonoBehaviour
         m_layerSelection = LayerMask.GetMask("Selectable");
     }
 
-    public void Update()
-    {
-        
-        UIManager.Instance.updateRessourcesCount(m_currentPlayer);
-    }
 
 }
