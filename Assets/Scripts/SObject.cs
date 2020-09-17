@@ -6,8 +6,6 @@ using UnityEngine.UI;
 
 public class SObject : MonoBehaviour
 {
-    private GameObject m_cursorGO;
-    private Renderer m_cursorRenderer;
     private LineRenderer m_lineRenderer;
     [SerializeField]
     protected Player m_belongsTo;
@@ -21,6 +19,8 @@ public class SObject : MonoBehaviour
     To avoid agent which cannot reach is destination*/
     [SerializeField]
     protected float m_radius = 0f;
+    [SerializeField]
+    protected float m_fieldOfView;
     private List<Vector3> m_pointsDestionationNavMesh = new List<Vector3>();
     [SerializeField]
     private FieldSelection m_fieldType = FieldSelection.circle;
@@ -62,13 +62,6 @@ public class SObject : MonoBehaviour
         
         updateNbrOfSobject();
         defineID();
-
-        if (DebugTool.tryFindGOChildren(gameObject, "Cursor", out m_cursorGO, LogType.Error) == false)
-            return;
-
-        if (m_cursorGO.TryGetComponent(out m_cursorRenderer) == false)
-            Debug.LogWarning("Unable to find any renderer component on cursor of " + gameObject.name);
-        m_cursorGO.SetActive(false);
 
         m_totalHealth = m_health;
     }
@@ -125,7 +118,7 @@ public class SObject : MonoBehaviour
         if (m_isNeutral)
             m_ID = m_name + "_Neutral_" + GameManager.Instance.Neutral.NbrSObject;
         else
-            m_ID = m_name + "_" + m_belongsTo.gameObject + "_" + m_belongsTo.NbrSObject;
+            m_ID = m_name + "_" + m_belongsTo.gameObject.name + "_" + m_belongsTo.NbrSObject;
 
     }
 
@@ -181,6 +174,7 @@ public class SObject : MonoBehaviour
                     Vector3 pos = new Vector3(transform.position.x - length / 2.0f + x, 0.01f, transform.position.z - length / 2.0f);
                     m_pointsDestionationNavMesh.Add(pos);
                 }
+
 
                 break;
             default:
@@ -253,7 +247,7 @@ public class SObject : MonoBehaviour
         else if (m_isNeutral == true)
             setColor(Color.grey);
         else
-            Debug.LogWarning("Unknown belonging for " + ID + " cannot set color of cursor");
+            Debug.LogWarning("Unknown belonging for " + ID + " cannot set color of border");
 
         
     }
@@ -262,7 +256,6 @@ public class SObject : MonoBehaviour
     {
         m_lineRenderer.startColor = color;
         m_lineRenderer.endColor = color;
-        m_cursorRenderer.material.SetColor("_Color", color);
     }
 
     public static SObject getSobjectFromSelectionField(GameObject selectionFieldGO)
@@ -279,15 +272,12 @@ public class SObject : MonoBehaviour
 
     public void isSelect()
     {
-        //add cursor on above the selectedObject      
         m_lineRenderer.enabled = true;
-        m_cursorGO.SetActive(true);
     }
 
     public void unSelect()
     {
         m_lineRenderer.enabled = false;
-        m_cursorGO.SetActive(false);
     }
 
     #endregion
@@ -304,15 +294,20 @@ public class SObject : MonoBehaviour
 
     }
 
+    //return true if the sobject is dead.
     public bool damage(uint damage)
     {
         if (m_health - damage > 0)
         {
+            print(m_ID + " take damage");
             m_health -= damage;
             return false;
         }
         else
         {
+            
+            m_health = 0;
+            print(m_ID + " is destroy");
             Destroy(gameObject);
             return true; 
         }
@@ -341,6 +336,37 @@ public class SObject : MonoBehaviour
             return true;
         }
     }
+
+    //set first element to the nearer T of this gameObject
+    public void nearerToFirstOne<T>(List<T> listSObjects) where T: MonoBehaviour
+    {
+        T minSObject;
+        List<T> sortSObjects = new List<T>();
+        int indexInList = 0;
+        if (listSObjects.Count > 0)
+            minSObject = listSObjects[0];
+        else
+            return;
+
+        float minDistance = Vector3.Distance(transform.position, minSObject.transform.position);
+
+        int i = 0;
+        foreach (T sobject in listSObjects)
+        {
+            float distance = Vector3.Distance(sobject.transform.position, transform.position);
+            if (distance < minDistance)
+            {
+                indexInList = i;
+                minSObject = sobject;
+                minDistance = distance;
+            }
+            i++;
+        }
+
+        Utilities.swapInList<T>(listSObjects, 0, indexInList);
+        
+    }
+
 
 }
 

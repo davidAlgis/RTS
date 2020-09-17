@@ -174,7 +174,7 @@ public class Utilities : MonoBehaviour
 
         if (hitColliders.Length > 0)
         {
-            print("hit :" + hitColliders[0].gameObject.name);
+            //print("hit :" + hitColliders[0].gameObject.name);
             return false;
         }
         else
@@ -203,6 +203,18 @@ public class Utilities : MonoBehaviour
         return true;
     }
 
+    public static bool swapInList<T>(List<T> list, int index1, int index2)
+    {
+        int listLength = list.Count;
+        if (listLength > index1 || listLength > index2)
+            return false;
+
+        T saveElementIndex1 = list[index1];
+        list[index1] = list[index2];
+        list[index2] = saveElementIndex1;
+
+        return true; 
+    }
     
 }
 

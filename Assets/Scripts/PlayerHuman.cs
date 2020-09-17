@@ -220,14 +220,20 @@ public class PlayerHuman : Player
 
     public void updateUIForSelection()
     {
-        if (needUpdateUI())
+        //To set the ID Sobject
+        if (m_currentSelection.Count > 0)
         {
             UIManager.Instance.enableDisableIDSObject();
             UIManager.Instance.setIDSObject(m_currentSelection[0]);
-            m_currentSelection[0].updateUI();
         }
+
+
+        //To set the UI creation button
+        if (needUpdateUI())
+            m_currentSelection[0].updateUI();
         else
             UIManager.Instance.setCreationButton(null, new List<CreationImprovement>());
+
     }
 
     public void removeFromCurrentSelection(SObject selectableObject)
@@ -244,7 +250,11 @@ public class PlayerHuman : Player
 
         if(m_currentSelection != null)
             foreach(SObject selectableObject in m_currentSelection)
-                selectableObject.unSelect();
+            {
+                //check if it has been destroyed 
+                if(selectableObject != null)
+                    selectableObject.unSelect();
+            }
 
         m_currentSquad = null;
         UIManager.Instance.enableDisableIDSObject(false);

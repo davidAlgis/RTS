@@ -24,7 +24,7 @@ public class UIManager : MonoBehaviour
     private Text m_sobjectName;
     private Text m_sobjectHealth;
     private Text[] m_textResources;
-
+    private SObject m_updateIDPanelWithSobject;
     public static UIManager Instance
     {
         get
@@ -102,6 +102,7 @@ public class UIManager : MonoBehaviour
 
 
         enableDisableIDSObject(false);
+        m_updateIDPanelWithSobject = null;
     }
 
     public void plotSelector(Vector3 extremity1, Vector3 extremity2)
@@ -195,7 +196,15 @@ public class UIManager : MonoBehaviour
         else
             m_sobjectName.text = sobject.Name;
 
-        m_sobjectHealth.text = sobject.Health + " / " + sobject.TotalHealth;
+        if (sobject is SResources)
+        {
+            SResources sresources = (SResources)sobject;
+            m_sobjectHealth.text = sresources.Contains + " / " + sresources.ContainsInitial;
+        }
+        else
+            m_sobjectHealth.text = sobject.Health + " / " + sobject.TotalHealth;
+
+        m_updateIDPanelWithSobject = sobject;
     }
 
     public void enableDisableIDSObject(bool enable = true)
@@ -203,6 +212,8 @@ public class UIManager : MonoBehaviour
         m_sobjectRepresentation.enabled = enable;
         m_sobjectName.enabled = enable;
         m_sobjectHealth.enabled = enable;
+        if (enable == false)
+            m_updateIDPanelWithSobject = null;
     }
 
     public void setDefaultCreationButton()
@@ -328,5 +339,21 @@ public class UIManager : MonoBehaviour
             
         }
         #endregion
+
+        #region IDPanel
+
+        if(m_updateIDPanelWithSobject != null)
+        {
+            if(m_updateIDPanelWithSobject is SResources)
+            {
+                SResources sresources = (SResources)m_updateIDPanelWithSobject;
+                m_sobjectHealth.text = sresources.Contains + " / " + sresources.ContainsInitial;
+            }
+            else
+                m_sobjectHealth.text = m_updateIDPanelWithSobject.Health + " / " + m_updateIDPanelWithSobject.TotalHealth;
+
+        }
+        #endregion
+
     }
 }

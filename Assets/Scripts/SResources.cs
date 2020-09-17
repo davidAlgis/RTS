@@ -15,6 +15,7 @@ public class SResources : SUnmovable
     private int m_lengthStepHarvest;
 
     public Resources Contains { get => m_contains; }
+    public Resources ContainsInitial { get => m_containsInitial; set => m_containsInitial = value; }
 
     protected override void Awake()
     {
@@ -27,17 +28,18 @@ public class SResources : SUnmovable
     /*Here we suppose that m_contains is a multiple of nbr.
      Therefore when a sworkers get resources it'll always 
      return resources(nbr) */
-    public Resources getResources(uint nbr)
+    public Resources getResources(uint nbr, Player belongTo)
     {
         if (m_contains == new Resources())
         {
+            Destroy(gameObject);
             Debug.Log("The resources is empty");
             return new Resources();
         }
 
         Resources result = Resources.realSubstract(m_contains, new Resources(nbr));
         m_contains -= nbr;
-
+        belongTo.Resources += result;
 
         if (m_contains <= m_containsInitial*((float)m_stepHarvest/(float)m_lengthStepHarvest))
         {
@@ -46,7 +48,7 @@ public class SResources : SUnmovable
                 Debug.LogWarning("try to access outside of the allocated memory");
                 return result;
             }
-            
+
             Mesh mesh = m_stepHarvestMesh[m_lengthStepHarvest - m_stepHarvest];
 
             if (mesh == null)
@@ -58,7 +60,10 @@ public class SResources : SUnmovable
             }
             //change the mesh to the next step
             GetComponent<MeshFilter>().sharedMesh = mesh;
+               
+            
             m_stepHarvest--;
+
         }
 
         //If the resources is empty we destroy the gameobject.

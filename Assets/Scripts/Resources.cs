@@ -289,6 +289,23 @@ public class Resources
         if (this == null)
             return "The ressources is null";
         
+        if(wood != 0)
+            if (gold == 0 && food == 0 && rock == 0)
+                return wood.ToString();
+
+        if (gold != 0)
+            if (wood == 0 && food == 0 && rock == 0)
+                return gold.ToString();
+        
+
+        if (food != 0)
+            if (wood == 0 && gold == 0 && rock == 0)
+                return food.ToString();
+
+        if (rock != 0)
+            if (wood == 0 && gold == 0 && food == 0)
+                return rock.ToString();
+
         return "Wood : " + wood + " Food : " + food + " Gold : " + gold + " Rock " + rock;
     }
 

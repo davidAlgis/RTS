@@ -64,26 +64,90 @@ public class SWorkers : SUnit
             yield return new WaitForSeconds(0.5f);
             i++;
         }
-
+        List<SResources> resourcesNearBy;
         //add resources until the resources is empty.
-        while (sresources.Contains >= 0)
+        while (sresources.Contains != new Resources())
         {
-            
-            yield return new WaitForSeconds(m_speedHarvest);
-            Resources resources = sresources.getResources(10);
-            print("rest " + sresources.Contains);
-            if (IsNeutral == false)
-                m_belongsTo.Resources += resources;
 
-            if (sresources.gameObject == null)
-                break;
-             
+            yield return new WaitForSeconds(m_speedHarvest);
+            bool isEmpty = sresources.Contains - Constant.RESOURCESTOGET == new Resources();
+
+            Resources resources = sresources.getResources(Constant.RESOURCESTOGET, m_belongsTo);
+            
+            if(isEmpty)
+            {
+                print(ID + " resources is empty");
+                resourcesNearBy = getSResourcesNearBy(m_fieldOfView, sresources);
+
+                if (resourcesNearBy.Count > 0)
+                {
+                    print("move to " + resourcesNearBy[0].gameObject.name);
+                    moveOneToSObject(resourcesNearBy[0]);
+                    actionGetResources(resourcesNearBy[0]);
+                    yield break;
+                }
+                else
+                {
+                    m_isActive = false;
+                    yield break;
+                }
+            }
+
+            if(sresources == null)
+            {
+                resourcesNearBy = getSResourcesNearBy(m_fieldOfView);
+
+                if (resourcesNearBy.Count > 0)
+                {
+                    moveOneToSObject(resourcesNearBy[0]);
+                    actionGetResources(resourcesNearBy[0]);
+                    yield break;
+                }
+                else
+                {
+                    m_isActive = false;
+                    yield break;
+                }
+            }
         }
 
 
+        resourcesNearBy = getSResourcesNearBy(m_fieldOfView, sresources);
+
+        print(ID + " out of loop look for resources");
+        if (resourcesNearBy.Count > 0)
+        {
+            print("move to " + resourcesNearBy[0].gameObject.name);
+            moveOneToSObject(resourcesNearBy[0]);
+            actionGetResources(resourcesNearBy[0]);
+            yield break;
+        }
+        else
+        {
+            m_isActive = false;
+            yield break;
+        }
 
     }
 
+
+    public List<SResources> getSResourcesNearBy(float radius, SResources addNotThisOne = null)
+    {
+        int layerMask = ~(LayerMask.GetMask("Floor") | LayerMask.GetMask("Selectable"));
+
+        var hitColliders = Physics.OverlapSphere(transform.position, radius, layerMask);
+        List<SResources> resources = new List<SResources>();
+
+        if (hitColliders.Length > 0)
+            foreach (Collider collider in hitColliders)
+                if (collider.TryGetComponent(out SResources sresources))
+                    if(sresources != addNotThisOne)
+                        resources.Add(sresources);
+
+        nearerToFirstOne(resources);
+
+        return resources;
+    }
     #endregion
 
     #region buildingCreation
@@ -294,6 +358,8 @@ public class SWorkers : SUnit
         //the building isn't in construction anymore
         sbuilging.IsInConstruction = false;
         #endregion
+
+        m_isActive = false;
     }
 
     #endregion

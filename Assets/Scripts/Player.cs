@@ -8,9 +8,12 @@ public class Player : MonoBehaviour
     private Resources m_resources = new Resources();
 
     private uint m_nbrSObject = 0;
+    [SerializeField]
+    private SBuilding m_motherHouse;
 
     public uint NbrSObject { get => m_nbrSObject; set => m_nbrSObject = value; }
     public Resources Resources { get => m_resources; set => m_resources = value; }
+    public SBuilding MotherHouse { get => m_motherHouse; set => m_motherHouse = value; }
 
 
     protected virtual void Awake(){}

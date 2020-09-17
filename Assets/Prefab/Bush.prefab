@@ -1,0 +1,214 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1099728808278725782
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6451620019444595598}
+  m_Layer: 0
+  m_Name: VegetablesDF
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6451620019444595598
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1099728808278725782}
+  m_LocalRotation: {x: 0.76040596, y: 0.000000033238408, z: 0.6494481, w: 0.00000015227414}
+  m_LocalPosition: {x: 1.3392358, y: 0, z: -1.0969552}
+  m_LocalScale: {x: -1, y: -1, z: -1}
+  m_Children: []
+  m_Father: {fileID: 8774962929095475414}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &3456672472155740772
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1360181885309982501}
+  m_Layer: 0
+  m_Name: vegetables2DF
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1360181885309982501
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3456672472155740772}
+  m_LocalRotation: {x: 0.76040596, y: 0.000000033238408, z: 0.6494481, w: 0.00000015227414}
+  m_LocalPosition: {x: 1.3392358, y: 0, z: -1.0969552}
+  m_LocalScale: {x: -1, y: -1, z: -1}
+  m_Children: []
+  m_Father: {fileID: 8774962929095475414}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &3677883370403507902
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8774962929095475414}
+  - component: {fileID: 6744480258656633242}
+  - component: {fileID: 6389903990110089414}
+  - component: {fileID: 3677883370403507897}
+  m_Layer: 0
+  m_Name: Bush
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8774962929095475414
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3677883370403507902}
+  m_LocalRotation: {x: 0.000000052904266, y: -0.76040596, z: 0.00000006194294, w: 0.64944804}
+  m_LocalPosition: {x: 17.266146, y: -0, z: 4.682201}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 1360181885309982501}
+  - {fileID: 3639814367798540205}
+  - {fileID: 6451620019444595598}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &6744480258656633242
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3677883370403507902}
+  m_Mesh: {fileID: 5958362384829529401, guid: cbec6ac8797e5594098c3a1a6f166256, type: 3}
+--- !u!23 &6389903990110089414
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3677883370403507902}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: -4006148316881293267, guid: cbec6ac8797e5594098c3a1a6f166256, type: 3}
+  - {fileID: 2100000, guid: d1698578814282a4ca73ae41a67017dc, type: 2}
+  - {fileID: 2100000, guid: da85e3ce88d02e646963041b1fa2f33c, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+--- !u!114 &3677883370403507897
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3677883370403507902}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 512a1168880db3045b2064716949150c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_belongsTo: {fileID: 0}
+  m_name: Food
+  m_isNeutral: 1
+  m_radius: 5
+  m_fieldOfView: 10
+  m_fieldType: 0
+  m_buttonCreation: []
+  m_representation: {fileID: 0}
+  m_health: 100
+  m_durationCreation: 0
+  m_costResources:
+    wood: 0
+    gold: 0
+    rock: 0
+    food: 0
+  m_contains:
+    wood: 0
+    gold: 0
+    rock: 0
+    food: 2500
+  m_stepHarvestMesh:
+  - {fileID: -613445115979379658, guid: 542f1d5bbab905b4dbfbbad2172f7a45, type: 3}
+  - {fileID: 8545400860991200972, guid: 34f9bdce728205246b3e1dcf66f27e9b, type: 3}
+  - {fileID: 7053296714815551525, guid: 08997c931f500834093ef11ade706246, type: 3}
+  - {fileID: 6065124741266896408, guid: ef299c0bb4dfe8942b76b1ea7dbf9f04, type: 3}
+--- !u!1 &6169598141419841087
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3639814367798540205}
+  m_Layer: 0
+  m_Name: vegetables2OP
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3639814367798540205
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6169598141419841087}
+  m_LocalRotation: {x: 0.76040596, y: 0.000000033238408, z: 0.6494481, w: 0.00000015227414}
+  m_LocalPosition: {x: 1.3392358, y: 0, z: -1.0969552}
+  m_LocalScale: {x: -1, y: -1, z: -1}
+  m_Children: []
+  m_Father: {fileID: 8774962929095475414}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

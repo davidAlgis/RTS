@@ -20,12 +20,6 @@ public class Squad
     public Squad(){}
 
     #region floor
-    public void resetSquad()
-    {
-        m_grid.Clear();
-        m_currentIndexGrid = 0;
-        m_directionIsSet = false;
-    }
 
     public void defineGoalAndSquadLeader(Vector3 goal)
     {
@@ -55,6 +49,14 @@ public class Squad
 
         setDirection(pointForDirection);
     }
+
+    public void resetSquad()
+    {
+        m_grid.Clear();
+        m_currentIndexGrid = 0;
+        m_directionIsSet = false;
+    }
+
 
     /*when the first smovable reach the zone around the goal, he defined the goal 
      * and the other smovable stop their coroutine. */
@@ -97,6 +99,32 @@ public class Squad
         m_directionIsSet = true;
     }
 
+    public void setGrid()
+    {
+
+        float sizeOfSquare = m_radiusMax * (m_nearerSquare - 1);
+        Vector2 currentPosition = new Vector2(-sizeOfSquare, sizeOfSquare);
+
+
+        float[,] newBasis = new float[2, 2] { { m_direction.y, -m_direction.x }, { m_direction.x, m_direction.y } };
+        newBasis = Utilities.invMatrix2x2(newBasis);
+
+        Vector2 translation = new Vector2(m_goal.x, m_goal.z);
+        m_grid.Add(Utilities.translateVector(translation, Utilities.changeBasis(newBasis, currentPosition)));
+        for (int i = 1; i < m_nearerSquare * m_nearerSquare * 2; i++)
+        {
+            currentPosition.x += m_radiusMax * 2;
+
+            if (i % m_nearerSquare == 0)
+            {
+                currentPosition.x = -sizeOfSquare;
+                currentPosition.y -= m_radiusMax * 2;
+            }
+            m_grid.Add(Utilities.translateVector(translation, Utilities.changeBasis(newBasis, currentPosition)));
+            //Utilities.instantiateSphereAtPosition(new Vector3(m_grid[i].x, 0.1f, m_grid[i].y), "grid" + i);
+        }
+    }
+
     public void getDestinationFloor(SMovable smovable)
     {
         while(m_currentIndexGrid < m_grid.Count)
@@ -119,31 +147,6 @@ public class Squad
         smovable.Agent.destination = smovable.transform.position;
     }
 
-    public void setGrid()
-    {
-
-        float sizeOfSquare = m_radiusMax * ( m_nearerSquare - 1);
-        Vector2 currentPosition = new Vector2(-sizeOfSquare, sizeOfSquare);
-
-
-        float[,] newBasis = new float[2, 2] {{ m_direction.y, -m_direction.x }, { m_direction.x, m_direction.y } };
-        newBasis = Utilities.invMatrix2x2(newBasis);
-
-        Vector2 translation = new Vector2(m_goal.x, m_goal.z);
-        m_grid.Add(Utilities.translateVector(translation, Utilities.changeBasis(newBasis, currentPosition)));
-        for (int i = 1; i < m_nearerSquare * m_nearerSquare * 2;i++)
-        {
-            currentPosition.x += m_radiusMax * 2;
-
-            if (i % m_nearerSquare == 0)
-            {
-                currentPosition.x = -sizeOfSquare;
-                currentPosition.y -= m_radiusMax * 2;
-            }
-            m_grid.Add(Utilities.translateVector(translation, Utilities.changeBasis(newBasis, currentPosition)));
-            //Utilities.instantiateSphereAtPosition(new Vector3(m_grid[i].x, 0.1f, m_grid[i].y), "grid" + i);
-        }
-    }
 
     public Vector2 getNthPositionOnGrid(int n)
     {
@@ -176,7 +179,7 @@ public class Squad
                     smovable.Agent.destination = sobject.PointsDestinationNavMesh[i];
                     indexInDestination = i + 1;
                     haveFindDestination = true;
-                    smovable.moveToSquadSObject(sobject);
+                    smovable.moveToSquadSObjectLoadCoroutine(sobject);
                     break;
 
                 }
@@ -219,6 +222,18 @@ public class Squad
                 SWorkers sworkers = (SWorkers)smovable;
                 sworkers.actionGetResources(sresources);
             }
+        }
+    }
+
+    #endregion
+
+    #region attack
+
+    public void attackSquad(SObject sobject)
+    {
+        foreach (SMovable smovable in m_squadSMovable)
+        {
+            smovable.beginAttack(sobject);
         }
     }
 
