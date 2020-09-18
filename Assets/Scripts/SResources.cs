@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Net;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class SResources : SUnmovable
 {
@@ -41,7 +38,7 @@ public class SResources : SUnmovable
         m_contains -= nbr;
         belongTo.Resources += result;
 
-        if (m_contains <= m_containsInitial*((float)m_stepHarvest/(float)m_lengthStepHarvest))
+        if (m_contains <= m_containsInitial * ((float)m_stepHarvest / (float)m_lengthStepHarvest))
         {
             if (m_lengthStepHarvest - m_stepHarvest >= m_stepHarvestMesh.Length)
             {
@@ -58,10 +55,25 @@ public class SResources : SUnmovable
                 return result;
 
             }
+
+            /*If the ressources is a tree we have to change the shader of the leaf 
+              and set it as the bark shader, indeed if we dont do this the texture 
+              trunk will have some leaves on it.*/
+            if (TryGetComponent(out Tree tree) && m_stepHarvest == m_lengthStepHarvest - 1)
+            {
+                Material[] materials = GetComponent<Renderer>().materials;
+
+                if (materials.LongLength < 2)
+                    Debug.LogWarning("Thz size of shader on the tree is anormal.");
+                else
+                    materials[1].shader = materials[0].shader;
+                
+            }
+
             //change the mesh to the next step
             GetComponent<MeshFilter>().sharedMesh = mesh;
-               
-            
+
+
             m_stepHarvest--;
 
         }
@@ -69,7 +81,7 @@ public class SResources : SUnmovable
         //If the resources is empty we destroy the gameobject.
         if (m_contains == new Resources())
             Debug.Log("The resources is empty");
-        
+
 
         return result;
     }
