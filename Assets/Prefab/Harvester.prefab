@@ -138,7 +138,7 @@ MonoBehaviour:
   m_fieldType: 1
   m_buttonCreation:
   - spriteButton: {fileID: 21300000, guid: 19e022486eba68a49b6fcf8c28d6c950, type: 3}
-    sobject: {fileID: 304778352091325266, guid: 378f8697df5d83a4da69aa133da127ae,
+    sobject: {fileID: 8176558281883296325, guid: c004390d61e216041a2486b852a67720,
       type: 3}
     method:
       m_PersistentCalls:
@@ -147,7 +147,7 @@ MonoBehaviour:
           m_MethodName: beginCreateBuilding
           m_Mode: 2
           m_Arguments:
-            m_ObjectArgument: {fileID: 304778352091325267, guid: 378f8697df5d83a4da69aa133da127ae,
+            m_ObjectArgument: {fileID: 3122385261322199054, guid: c004390d61e216041a2486b852a67720,
               type: 3}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
             m_IntArgument: 0

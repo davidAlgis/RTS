@@ -10,11 +10,13 @@ public class Player : MonoBehaviour
     private uint m_nbrSObject = 0;
     [SerializeField]
     private SBuilding m_motherHouse;
+    [SerializeField]
+    private Color m_color;
 
     public uint NbrSObject { get => m_nbrSObject; set => m_nbrSObject = value; }
     public Resources Resources { get => m_resources; set => m_resources = value; }
     public SBuilding MotherHouse { get => m_motherHouse; set => m_motherHouse = value; }
-
+    public Color Color { get => m_color; set => m_color = value; }
 
     protected virtual void Awake(){}
 

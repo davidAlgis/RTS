@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -36,6 +38,10 @@ public class SObject : MonoBehaviour
     private float m_durationCreation = 0.0f;
     [SerializeField]
     private Resources m_costResources = new Resources();
+    [SerializeField]
+    protected List<SObject> m_sobjectsInteracting = new List<SObject>();
+    [SerializeField]
+    protected SObject m_interactWith;
 
     #region getter-setter
     public Player BelongsTo { get => m_belongsTo; set => m_belongsTo = value; }
@@ -50,6 +56,9 @@ public class SObject : MonoBehaviour
     public Sprite Representation { get => m_representation; set => m_representation = value; }
     public uint TotalHealth { get => m_totalHealth; set => m_totalHealth = value; }
     public string Name { get => m_name; set => m_name = value; }
+    public List<SObject> SobjectsInteracting { get => m_sobjectsInteracting; set => m_sobjectsInteracting = value; }
+    public SObject InteractWith { get => m_interactWith; set => m_interactWith = value; }
+    public float FieldOfView { get => m_fieldOfView; set => m_fieldOfView = value; }
     #endregion
 
 
@@ -238,18 +247,14 @@ public class SObject : MonoBehaviour
         m_currentButtonCreation = creationImprovement;
     }
 
-    public void defineColorSObject(Player player)
+    public void defineColorSObject()
     {
-        if (m_belongsTo == player)
-            setColor(Color.blue);
-        else if (m_belongsTo is PlayerEnnemy)
-            setColor(Color.red);
-        else if (m_isNeutral == true)
+        
+        if (m_isNeutral == true)
             setColor(Color.grey);
         else
-            Debug.LogWarning("Unknown belonging for " + ID + " cannot set color of border");
+            setColor(m_belongsTo.Color);
 
-        
     }
 
     private void setColor(Color color)
@@ -294,6 +299,11 @@ public class SObject : MonoBehaviour
 
     }
 
+    public virtual void onClick(SObject sobject)
+    {
+        StopAllCoroutines();
+        UIManager.Instance.blinkSelectionField(sobject);
+    }
     //return true if the sobject is dead.
     public bool damage(uint damage)
     {
@@ -308,7 +318,7 @@ public class SObject : MonoBehaviour
             
             m_health = 0;
             print(m_ID + " is destroy");
-            Destroy(gameObject);
+            //Destroy(gameObject);
             return true; 
         }
             
@@ -367,7 +377,70 @@ public class SObject : MonoBehaviour
         
     }
 
+    public virtual void destroy()
+    {
+        /*if (m_sobjectsInteracting != null)
+        {
+            foreach(SObject sobject in m_sobjectsInteracting)
+            {
+                getSobjectNearBy<this>(sobject.fieldOfView,
+                //sobject.onClick()
+            }
+        }*/
+        
+        Destroy(gameObject);
+    }
 
+    public void changeInteractionTo(SObject interactToSobject)
+    {
+        //if the sobject isn't already interacting with interactToSobject
+        if (m_interactWith == interactToSobject)
+            return;
+
+        //remove this sobject from his current interaction sobject
+        if(m_interactWith != null)
+            m_interactWith.SobjectsInteracting.Remove(this);
+
+        //add this sobject to the interactToSobject list of sobject.
+        if (interactToSobject != null)
+            if (interactToSobject.SobjectsInteracting.Contains(this) == false)
+                interactToSobject.SobjectsInteracting.Add(this);
+
+        //set his interaction with interactToSobject
+        m_interactWith = interactToSobject;
+
+    }
+
+    public List<T> getSobjectNearBy<T>(float radius, T addNotThisOne) where T : SObject
+    {
+        int layerMask = ~(LayerMask.GetMask("Floor") | LayerMask.GetMask("Selectable"));
+
+        var hitColliders = Physics.OverlapSphere(transform.position, radius, layerMask);
+        List<T> sobjects = new List<T>();
+
+        if (hitColliders.Length > 0)
+            foreach (Collider collider in hitColliders)
+                if (collider.TryGetComponent(out T sobject))
+                    if (sobject != addNotThisOne)
+                        sobjects.Add(sobject);
+
+        nearerToFirstOne(sobjects);
+
+        return sobjects;
+    }
+
+    public List<T> getEnnemiesNearBy<T>(float radius) where T : SObject
+    {
+        List<T> sobjectNearBy = getSobjectNearBy<T>(radius, (T)this);
+        List<T> ennemies = new List<T>();
+        foreach (T sobject in sobjectNearBy)
+        {
+            if (sobject.BelongsTo != m_belongsTo && sobject.IsNeutral == false)
+                ennemies.Add(sobject);
+        }
+
+        return ennemies;
+    }
 }
 
 public enum FieldSelection

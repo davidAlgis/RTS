@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 public class SResources : SUnmovable
 {
@@ -6,6 +8,7 @@ public class SResources : SUnmovable
     private Resources m_contains;
     private Resources m_containsInitial;
 
+    private int m_nbrOfWorkersOn = 0;
     private int m_stepHarvest;
     [SerializeField]
     private Mesh[] m_stepHarvestMesh = new Mesh[4];
@@ -29,7 +32,7 @@ public class SResources : SUnmovable
     {
         if (m_contains == new Resources())
         {
-            Destroy(gameObject);
+            destroy();
             Debug.Log("The resources is empty");
             return new Resources();
         }
@@ -84,5 +87,53 @@ public class SResources : SUnmovable
 
 
         return result;
+    }
+
+    public override void destroy()
+    {
+        print("destroy resources");
+        //we change the target of all object which is interacting with this one
+        if (m_sobjectsInteracting != null)
+        {
+            int nbrOfSobjectsNearBy;
+            List<SResources> sresources;
+
+            if (m_sobjectsInteracting.Count > 0)
+            {
+                sresources = getSobjectNearBy<SResources>(FieldOfView, this);
+                nbrOfSobjectsNearBy = sresources.Count;
+                //We make a copy of the list to avoid loop on element which will be removed.
+                List<SObject> sobjectsInteractingCopy = m_sobjectsInteracting.ToList<SObject>();
+
+                foreach (SObject sobject in sobjectsInteractingCopy)
+                {
+                    print(sobject.ID + " to another target");
+                    if (nbrOfSobjectsNearBy > 0)
+                    {
+                        print("sobject click");
+                        sobject.onClick(sresources[0]);
+                    }
+                    else
+                    {
+
+                        sobject.StopAllCoroutines();
+                        if (sobject is SMovable)
+                        {
+                            SMovable smovable = (SMovable)sobject;
+                            smovable.IsActive = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        //we check if it's in selection
+        if (m_belongsTo is PlayerHuman)
+        {
+            PlayerHuman playerHuman = (PlayerHuman)m_belongsTo;
+            playerHuman.removeFromCurrentSelection(this);
+        }
+
+        Destroy(gameObject);
     }
 }

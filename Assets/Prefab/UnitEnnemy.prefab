@@ -145,6 +145,8 @@ MonoBehaviour:
     gold: 0
     rock: 0
     food: 0
+  m_sobjectsInteracting: []
+  m_interactWith: {fileID: 0}
   m_speedAttack: 0
   m_powerAttack: 0
   m_distanceMaxAttack: 0

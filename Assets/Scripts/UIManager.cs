@@ -284,7 +284,7 @@ public class UIManager : MonoBehaviour
 
     public void blinkSelectionField(SObject sobject)
     {
-        sobject.defineColorSObject(GameManager.Instance.CurrentPlayer);
+        sobject.defineColorSObject();
         StartCoroutine(blinkSelectionFieldCoroutine(sobject));
     }
 

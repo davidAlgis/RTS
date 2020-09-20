@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.Events;
 
 public class SBuilding : SUnmovable
@@ -10,8 +11,6 @@ public class SBuilding : SUnmovable
     private Queue<CreationImprovement> m_queueCreation = new Queue<CreationImprovement>();
     private bool m_creationOnGoing = false;
     [SerializeField]
-    private Mesh[] m_stepConstructionMesh = new Mesh[4];
-    [SerializeField]
     private bool m_isInConstruction;
     /*state of construction is between 0 and 1 
      * 0 means the begin of construction and 1 the end*/
@@ -19,26 +18,20 @@ public class SBuilding : SUnmovable
     private float m_stateOfConstruction = 0.0f;
     private uint m_indexOfConstructionMesh = 0;
     private Material m_initMaterial;
-    private Mesh m_initMeshBuilding;
     private uint m_builderOnConstruction = 0;
+    private Text m_percentageConstruction;
 
     public Queue<CreationImprovement> QueueCreation { get => m_queueCreation; set => m_queueCreation = value; }
-    public Mesh[] StepConstructionMesh { get => m_stepConstructionMesh; set => m_stepConstructionMesh = value; }
     public bool IsInConstruction { get => m_isInConstruction; set => m_isInConstruction = value; }
     public Material InitMaterial { get => m_initMaterial; }
     public float StateOfConstruction { get => m_stateOfConstruction; set => m_stateOfConstruction = value; }
     public uint IndexOfConstructionMesh { get => m_indexOfConstructionMesh; set => m_indexOfConstructionMesh = value; }
-    public Mesh InitMeshBuilding { get => m_initMeshBuilding; set => m_initMeshBuilding = value; }
     public uint BuilderOnConstruction { get => m_builderOnConstruction; set => m_builderOnConstruction = value; }
 
     protected override void Awake()
     {
         base.Awake();
-        if (m_stepConstructionMesh != null)
-            foreach (Mesh meshFilter in m_stepConstructionMesh)
-                if (meshFilter == null)
-                    Debug.LogWarning("The mesh of the step of construction of " + gameObject.name + " have not been defined");
-
+        
         if (TryGetComponent(out MeshRenderer meshRenderer))
             m_initMaterial = meshRenderer.material;
         else
@@ -50,8 +43,11 @@ public class SBuilding : SUnmovable
             Debug.LogWarning("Unable to find any MeshFilter component on " + gameObject.name);
             return;
         }
-        //save the mesh of the full building
-        m_initMeshBuilding = meshFilterInit.mesh;
+
+        if(DebugTool.tryFindGOChildren(gameObject, "Cloth/Canvas/Percentage", out GameObject tempGO, LogType.Error))
+            if (tempGO.TryGetComponent(out m_percentageConstruction) == false)
+                Debug.LogWarning("Unable to find any Text component on " + tempGO.name);
+        
     }
 
     public void addToQueue(CreationImprovement buttonImage)
@@ -135,6 +131,57 @@ public class SBuilding : SUnmovable
         }
     }
 
+    public void Update()
+    {
+        if(m_isInConstruction)
+            m_percentageConstruction.text = ((int)(m_stateOfConstruction * 100.0f)).ToString() + " %";
+        
+    }
+
+    public override void destroy()
+    {
+        //we change the target of all object which is interacting with this one
+        if (m_sobjectsInteracting != null)
+        {
+            int nbrOfSobjectsNearBy;
+            List<SObject> sobjects;
+
+            if (m_sobjectsInteracting.Count > 0)
+            {
+                //We make a copy of the list to avoid loop on element which will be removed.
+                List<SObject> sobjectsInteractingCopy = m_sobjectsInteracting.ToList<SObject>();
+
+                foreach (SObject sobject in sobjectsInteractingCopy)
+                {
+                    sobjects = getEnnemiesNearBy<SObject>(FieldOfView);
+                    nbrOfSobjectsNearBy = sobjects.Count;
+
+                    if (nbrOfSobjectsNearBy > 0)
+                        sobject.onClick(sobjects[0]);
+                    else
+                    {
+
+                        sobject.StopAllCoroutines();
+                        if (sobject is SMovable)
+                        {
+                            SMovable smovable = (SMovable)sobject;
+                            smovable.IsActive = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        //we check if it's in selection
+        if (m_belongsTo is PlayerHuman)
+        {
+            PlayerHuman playerHuman = (PlayerHuman)m_belongsTo;
+            playerHuman.removeFromCurrentSelection(this);
+        }
+
+        Destroy(gameObject);
+
+    }
 }
 
 public enum CreationType

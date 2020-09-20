@@ -23,10 +23,9 @@ public class RTSCameraController : MonoBehaviour
     [Header("Movement Limits")]
     [Space]
     public bool enableMovementLimits;
-    public Vector2 heightLimit;
-    public Vector2 lenghtLimit;
-    public Vector2 widthLimit;
     private Vector2 zoomLimit;
+    public Vector2 leftBottomCorner;
+    public Vector2 rightTopCorner;
 
     private float panSpeed;
     private Vector3 initialPos;
@@ -175,11 +174,25 @@ public class RTSCameraController : MonoBehaviour
         if (enableMovementLimits == true)
         {
             //movement limits
-            pos = transform.position;
+            /*pos = transform.position;
             pos.y = Mathf.Clamp(pos.y, heightLimit.x, heightLimit.y);
             pos.z = Mathf.Clamp(pos.z, lenghtLimit.x, lenghtLimit.y);
             pos.x = Mathf.Clamp(pos.x, widthLimit.x, widthLimit.y);
-            transform.position = pos;
+            transform.position = pos;*/
+
+            pos = transform.position;
+
+            if (pos.x < leftBottomCorner.x)
+                transform.position = new Vector3(leftBottomCorner.x, pos.y, pos.z);
+            
+            if(pos.z < leftBottomCorner.y)
+                transform.position = new Vector3(pos.x, pos.y, leftBottomCorner.y);
+
+            if (pos.x > rightTopCorner.x)
+                transform.position = new Vector3(rightTopCorner.x, pos.y, pos.z);
+
+            if (pos.z > rightTopCorner.y)
+                transform.position = new Vector3(pos.x, pos.y, rightTopCorner.y);
         }
 
 

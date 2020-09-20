@@ -28,11 +28,11 @@ public class SMovable : SObject
     #endregion
     protected Squad m_belongsToSquad;
     [SerializeField]
-    protected bool m_isActive;
+    private bool m_isActive;
 
     public NavMeshAgent Agent { get => m_agent; set => m_agent = value; }
     public Squad BelongsToSquad { get => m_belongsToSquad;}
-
+    public bool IsActive { get => m_isActive; set => m_isActive = value; }
 
     protected override void Awake()
     {
@@ -54,6 +54,18 @@ public class SMovable : SObject
         attack(rayHit);
     }
 
+    public override void onClick(SObject sobject)
+    {
+        base.onClick(sobject);
+        m_isActive = true;
+
+        changeInteractionTo(sobject);
+        //if it's a smovable we redefine his destination points
+        if (sobject is SMovable)
+            sobject.definePointsDestination();
+        moveToSquadSobject(sobject);
+    }
+
     #region movement
 
     public void moveTo(RaycastHit rayHit)
@@ -62,6 +74,7 @@ public class SMovable : SObject
 
         if (rayHit.collider.gameObject.layer == LayerMask.NameToLayer("Floor"))
         {
+            changeInteractionTo(null);
             Agent.destination = dest;
             moveToSquadFloor(dest);
         }
@@ -69,6 +82,7 @@ public class SMovable : SObject
         {
             
             SObject sobject = SObject.getSobjectFromSelectionField(rayHit.collider.gameObject);
+            changeInteractionTo(sobject);
             //if it's a smovable we redefine his destination points
             if (sobject is SMovable)
                 sobject.definePointsDestination();
@@ -98,7 +112,7 @@ public class SMovable : SObject
 
     public bool moveOneToSObject(SObject target)
     {
-
+        changeInteractionTo(target);
         Vector3 dest = new Vector3(0.0f, Mathf.Infinity, 0.0f);
         if (target.PointsDestinationNavMesh != null)
             for (int i = 1; i < target.PointsDestinationNavMesh.Count; i++)
@@ -197,13 +211,13 @@ public class SMovable : SObject
     protected IEnumerator isUnderAttackCoroutine()
     {
         print(ID + " is under attack");
-        List<SObject> ennemies = getEnnemiesNearBy(m_fieldOfView);
+        List<SMovable> ennemies = getEnnemiesNearBy<SMovable>(m_fieldOfView);
         int nbrIteration = 0;
 
         while (ennemies.Count == 0)
         {
             print(ennemies.Count);
-            ennemies = getEnnemiesNearBy(m_fieldOfView);
+            ennemies = getEnnemiesNearBy<SMovable>(m_fieldOfView);
 
             nbrIteration++;
 
@@ -272,22 +286,8 @@ public class SMovable : SObject
             {
                 m_agent.destination = transform.position;
                 if (target.damage(m_powerAttack))
-                {
+                    target.destroy();
 
-                    //is dead
-                    //we look for a ennemies nearby and we attack it
-                    List<SObject> ennemies = getEnnemiesNearBy(m_fieldOfView);
-                    if (ennemies.Count > 0)
-                    {
-                        actionAttack(ennemies[0]);
-                        yield break;
-                    }
-                    else
-                    {
-                        m_isActive = false;
-                        StopAllCoroutines();
-                    }
-                }
             }
             else
                 m_agent.destination = target.transform.position;
@@ -306,9 +306,55 @@ public class SMovable : SObject
         }
         m_isActive = false;
     }
-    
+
 
     #endregion
+
+    public override void destroy()
+    {
+        //we change the target of all object which is interacting with this one
+        if (m_sobjectsInteracting != null)
+        {
+            int nbrOfSMovableNearBy;
+            List<SMovable> smovables;
+
+            if (m_sobjectsInteracting.Count > 0)
+            {
+                //We make a copy of the list to avoid loop on element which will be removed.
+                List<SObject> sobjectsInteractingCopy = m_sobjectsInteracting.ToList<SObject>();
+
+                foreach (SObject sobject in sobjectsInteractingCopy)
+                {
+                    smovables = getSobjectNearBy(FieldOfView, this);
+                    nbrOfSMovableNearBy = smovables.Count;
+
+                    if (nbrOfSMovableNearBy > 0)
+                        sobject.onClick(smovables[0]);
+                    else
+                    {
+
+                        sobject.StopAllCoroutines();
+                        if(sobject is SMovable)
+                        {
+                            SMovable smovable = (SMovable)sobject;
+                            smovable.IsActive = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        //we check if it's in selection
+        if(m_belongsTo is PlayerHuman)
+        {
+            PlayerHuman playerHuman = (PlayerHuman)m_belongsTo;
+            playerHuman.removeFromCurrentSelection(this);
+            playerHuman.removeFromCurrentSquad(this);
+        }
+
+        Destroy(gameObject);
+
+    }
 
     public Pair<float, Vector3> calculatePathLength(Vector3 destination)
     {
@@ -347,28 +393,7 @@ public class SMovable : SObject
             return new Pair<float, Vector3>(pathLength, transform.position);
     }
 
-    public List<SObject> getEnnemiesNearBy(float radius)
-    {
-        int layerMask = ~(LayerMask.GetMask("Floor") | LayerMask.GetMask("Selectable"));
-
-        var hitColliders = Physics.OverlapSphere(transform.position, radius, layerMask);
-        List<SObject> ennemies = new List<SObject>();
-
-        //if hitcolliders.length = 1 it means that it only detect himself.
-        if (hitColliders.Length > 1)
-        {
-            foreach(Collider collider in hitColliders)
-            {
-                if(collider.TryGetComponent(out SObject sobject))
-                    if (sobject.BelongsTo != m_belongsTo && sobject.IsNeutral == false)
-                        ennemies.Add(sobject);
-                
-            }
-        }
-
-        nearerToFirstOne(ennemies); 
-        return ennemies;
-    }
+    
 
     public bool isMotherHouseNearBy(float radius)
     {

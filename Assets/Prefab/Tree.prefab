@@ -84,7 +84,7 @@ MeshRenderer:
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
   m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 0
+  m_SelectedEditorRenderState: 3
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
@@ -109,7 +109,7 @@ MonoBehaviour:
   m_isNeutral: 1
   m_radius: 3
   m_fieldOfView: 0
-  m_fieldType: 0
+  m_fieldType: 1
   m_buttonCreation: []
   m_representation: {fileID: 0}
   m_health: 100

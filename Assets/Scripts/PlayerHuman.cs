@@ -275,7 +275,7 @@ public class PlayerHuman : Player
             }
         }    
 
-        sobject.defineColorSObject(this);
+        sobject.defineColorSObject();
         sobject.isSelect();
         m_currentSelection.Add(sobject);
     }
@@ -292,5 +292,12 @@ public class PlayerHuman : Player
                     sobject.onClick(rayHit);
                 }
         }             
+    }
+
+    public void removeFromCurrentSquad(SMovable smovable)
+    {
+        if(m_currentSquad.SquadSMovable.Contains(smovable))
+            m_currentSquad.SquadSMovable.Remove(smovable);
+        
     }
 }

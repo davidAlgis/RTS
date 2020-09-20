@@ -12,12 +12,13 @@ GameObject:
   - component: {fileID: 3888481421781903980}
   - component: {fileID: 7406767906384500373}
   - component: {fileID: 997295743281838917}
+  - component: {fileID: 3661001906972989973}
   m_Layer: 0
   m_Name: Gold
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &5237035452859093082
 Transform:
@@ -97,7 +98,7 @@ MonoBehaviour:
   m_isNeutral: 1
   m_radius: 5
   m_fieldOfView: 10
-  m_fieldType: 1
+  m_fieldType: 0
   m_buttonCreation: []
   m_representation: {fileID: 0}
   m_health: 100
@@ -117,3 +118,16 @@ MonoBehaviour:
   - {fileID: -4267168851857306033, guid: f42fc95e2a246df4aa1144e5609ec691, type: 3}
   - {fileID: 4975154163142927282, guid: 040f66a07adbdfe42bef87b196d8c0eb, type: 3}
   - {fileID: 2920790493879521215, guid: 13a982ebdec7bfc42bd800391aebeec3, type: 3}
+--- !u!65 &3661001906972989973
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9148770343574168137}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 5.435801, y: 5.5356793, z: 2.1026073}
+  m_Center: {x: 0.36760545, y: -0.011889576, z: 0.87731147}

@@ -199,7 +199,9 @@ public class Squad
 
     public void constructBuilding(GameObject buildingGO)
     {
-        foreach(SMovable smovable in m_squadSMovable)
+        if (m_squadSMovable == null)
+            return;
+        foreach (SMovable smovable in m_squadSMovable)
         {
             if(smovable is SWorkers)
             {
@@ -215,6 +217,9 @@ public class Squad
 
     public void harvestSquad(SResources sresources)
     {
+        if (m_squadSMovable == null)
+            return;
+
         foreach (SMovable smovable in m_squadSMovable)
         {
             if (smovable is SWorkers)
@@ -231,6 +236,9 @@ public class Squad
 
     public void attackSquad(SObject sobject)
     {
+        if (m_squadSMovable == null)
+            return;
+
         foreach (SMovable smovable in m_squadSMovable)
         {
             smovable.beginAttack(sobject);
