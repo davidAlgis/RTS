@@ -35,6 +35,7 @@ public static class DebugTool
                     break;
                 case (LogType.Error):
                     Debug.LogError("Unable to find " + GONameToFind + " in " + GOParent.gameObject.name);
+                    Debug.LogError("Unable to find " + GONameToFind + " in " + GOParent.gameObject.name);
                     break;
                 default:
                     Debug.LogWarning("LogType undefined " + debugType);

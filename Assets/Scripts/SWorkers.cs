@@ -84,7 +84,6 @@ public class SWorkers : SUnit
         }
     }
 
-
     public void actionGetResources(SResources sresources)
     {
 
@@ -163,8 +162,10 @@ public class SWorkers : SUnit
 
     }
 
-    public void beginCreateBuilding(GameObject buildingGO)
+    public void beginCreateBuilding()//GameObject buildingGO)
     {
+
+        GameObject buildingGO = m_currentButtonCreation.go;
         if (m_belongsTo is PlayerHuman)
         {
             PlayerHuman p = (PlayerHuman)m_belongsTo;
@@ -194,7 +195,7 @@ public class SWorkers : SUnit
             UIManager.Instance.SbuildingCreated = sbuilding;
             sbuilding.IsInConstruction = true;
             //when we change this value, the update function of UIManager and the update of PlayerHuman handle the rest.
-            UIManager.Instance.BuildingCreated = Instantiate(buildingGO, rayHit.point, Quaternion.identity);
+            UIManager.Instance.BuildingCreated = (GameObject)Instantiate(buildingGO, rayHit.point, Quaternion.identity);
 
 
             print(UIManager.Instance.BuildingCreated.name);
@@ -229,7 +230,15 @@ public class SWorkers : SUnit
         {
             //reset the material
             if (buildingGO.TryGetComponent(out MeshRenderer meshRenderer))
-                meshRenderer.material = sbuilding.InitMaterial;
+            {
+
+                //meshRenderer.material = sbuilding.InitMaterial;
+                meshRenderer.materials = sbuilding.InitMaterials;
+                for (int i = 0; i < meshRenderer.materials.Length; i++)
+                {
+                    meshRenderer.materials[i] = sbuilding.InitMaterials[i];
+                }
+            }
             else
                 Debug.LogWarning("Unable to find the material component of " + buildingGO.name);
 

@@ -28,7 +28,7 @@ public class SObject : MonoBehaviour
     private FieldSelection m_fieldType = FieldSelection.circle;
     [SerializeField]
     protected List<CreationImprovement> m_buttonCreation = new List<CreationImprovement>();
-    private CreationImprovement m_currentButtonCreation;
+    protected CreationImprovement m_currentButtonCreation;
     [SerializeField]
     private Sprite m_representation = null;
     [SerializeField]
@@ -203,7 +203,7 @@ public class SObject : MonoBehaviour
             return; 
         }
 
-        GameObject selectionFieldGO = Instantiate(UIManager.Instance.DefaultLineRendererGO);
+        GameObject selectionFieldGO = (GameObject)Instantiate(UIManager.Instance.DefaultLineRendererGO);
         //selectionFieldGO.transform.position = Vector3.zero;
         selectionFieldGO.transform.position = transform.position;// new Vector3(transform.position.x, 0.1f, transform.position.z);// new Vector3(0.0f , 0.2f, 0.0f);
 
@@ -379,18 +379,14 @@ public class SObject : MonoBehaviour
 
     public virtual void destroy()
     {
-        /*if (m_sobjectsInteracting != null)
-        {
-            foreach(SObject sobject in m_sobjectsInteracting)
-            {
-                getSobjectNearBy<this>(sobject.fieldOfView,
-                //sobject.onClick()
-            }
-        }*/
-        
+
         Destroy(gameObject);
     }
 
+    public void testFunction()
+    {
+        Debug.Log("I'm a test");
+    }
     public void changeInteractionTo(SObject interactToSobject)
     {
         //if the sobject isn't already interacting with interactToSobject
@@ -458,6 +454,6 @@ public struct CreationImprovement
     public SObject sobject;
     //the methods used here can only have less than 2 parameters.
     public UnityEvent method;
-
+    public GameObject go;
 
 }

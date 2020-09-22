@@ -30,7 +30,7 @@ Transform:
   m_GameObject: {fileID: 3122385261322199054}
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
   m_LocalPosition: {x: 0, y: -0.19, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children:
   - {fileID: 1025539441244618864}
   m_Father: {fileID: 0}
@@ -51,8 +51,8 @@ MonoBehaviour:
   m_belongsTo: {fileID: 0}
   m_name: House
   m_isNeutral: 0
-  m_radius: 7.5
-  m_fieldOfView: 12
+  m_radius: 12
+  m_fieldOfView: 30
   m_fieldType: 0
   m_buttonCreation:
   - spriteButton: {fileID: 21300000, guid: f613bd9799d84694a871bbac0cfa213e, type: 3}
@@ -73,6 +73,7 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+    go: {fileID: 0}
   m_representation: {fileID: 21300000, guid: 19e022486eba68a49b6fcf8c28d6c950, type: 3}
   m_health: 100
   m_durationCreation: 20
@@ -81,10 +82,8 @@ MonoBehaviour:
     gold: 0
     rock: 0
     food: 0
-  m_stepConstructionMesh:
-  - {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
-  - {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
-  - {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+  m_sobjectsInteracting: []
+  m_interactWith: {fileID: 0}
   m_isInConstruction: 1
   m_stateOfConstruction: 0
 --- !u!33 &6941366155598604331
@@ -183,6 +182,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2094078181271179805}
     m_Modifications:
+    - target: {fileID: 2045665044659184621, guid: 05b1ea59546811d4ba49a0f5e78a0692,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2045665044659184621, guid: 05b1ea59546811d4ba49a0f5e78a0692,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0.25
+      objectReference: {fileID: 0}
     - target: {fileID: 3971474983751287877, guid: 05b1ea59546811d4ba49a0f5e78a0692,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -237,6 +246,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3971474983751287880, guid: 05b1ea59546811d4ba49a0f5e78a0692,
+        type: 3}
+      propertyPath: m_AABB.m_Extent.x
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 3971474983751287880, guid: 05b1ea59546811d4ba49a0f5e78a0692,
+        type: 3}
+      propertyPath: m_AABB.m_Extent.y
+      value: 2.220446e-16
+      objectReference: {fileID: 0}
+    - target: {fileID: 3971474983751287880, guid: 05b1ea59546811d4ba49a0f5e78a0692,
+        type: 3}
+      propertyPath: m_AABB.m_Extent.z
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 3971474983751287882, guid: 05b1ea59546811d4ba49a0f5e78a0692,
         type: 3}

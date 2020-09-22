@@ -25,6 +25,10 @@ public class UIManager : MonoBehaviour
     private Text m_sobjectHealth;
     private Text[] m_textResources;
     private SObject m_updateIDPanelWithSobject;
+    [SerializeField]
+    private GameObject m_arrowGO;
+    private Animator[] m_arrowAnimator = new Animator[4];
+
     public static UIManager Instance
     {
         get
@@ -40,6 +44,7 @@ public class UIManager : MonoBehaviour
     public GameObject BuildingCreated { get => m_buildingCreated; set => m_buildingCreated = value; }
     public GameObject DefaultLineRendererGO { get => m_defaultLineRendererGO; set => m_defaultLineRendererGO = value; }
     public SBuilding SbuildingCreated { get => m_sbuildingCreated; set => m_sbuildingCreated = value; }
+    public Animator[] ArrowAnimator { get => m_arrowAnimator; set => m_arrowAnimator = value; }
 
     private void Awake()
     {
@@ -100,10 +105,31 @@ public class UIManager : MonoBehaviour
                 Debug.LogWarning("Unable to find any text component in " + sobjectRepresentationGO.name);
         }
 
+        //Define Arrows animator.
+        GameObject tempGO1, tempGO2, tempGO3, tempGO4;
+        if(DebugTool.tryFindGOChildren(m_arrowGO, "ArrowParent/Arrow", out tempGO1))
+            m_arrowAnimator[0] = tempGO1.GetComponent<Animator>();
+        if (DebugTool.tryFindGOChildren(m_arrowGO, "ArrowParent (1)/Arrow (1)", out tempGO2))
+            m_arrowAnimator[1] = tempGO2.GetComponent<Animator>();
+        if (DebugTool.tryFindGOChildren(m_arrowGO, "ArrowParent (2)/Arrow (2)", out tempGO3))
+            m_arrowAnimator[2] = tempGO3.GetComponent<Animator>();
+        if (DebugTool.tryFindGOChildren(m_arrowGO, "ArrowParent (3)/Arrow (3)", out tempGO4))
+            m_arrowAnimator[3] = tempGO4.GetComponent<Animator>();
 
         enableDisableIDSObject(false);
         m_updateIDPanelWithSobject = null;
     }
+
+    public void plotArrowAt(Vector3 pos)
+    {
+        foreach(Animator anim in m_arrowAnimator)
+            anim.SetBool("LaunchAnimation", true);
+
+        m_arrowGO.transform.position = new Vector3(pos.x, 1.5f, pos.z);
+    }
+
+
+
 
     public void plotSelector(Vector3 extremity1, Vector3 extremity2)
     {
@@ -150,8 +176,8 @@ public class UIManager : MonoBehaviour
                     }
                     else if(sobject is SWorkers)
                     {
+                        button.onClick.AddListener(() => sobject.setCurrentButtonCreation(creationButton));
                         button.onClick.AddListener(() => creationButton.method?.Invoke());
-
                     }
                     else
                         button.onClick.AddListener(() => creationButton.method?.Invoke());
@@ -321,7 +347,20 @@ public class UIManager : MonoBehaviour
                 {
                     GameManager.Instance.CurrentPlayer.ConstructionIsAvailable = true;
                     if (UIManager.Instance.BuildingCreated.TryGetComponent(out MeshRenderer meshRenderer))
-                        meshRenderer.material = GameManager.Instance.MatBuildingCreationAvailable;
+                    {
+                        /*Here you have to create an array to define meshRenderer.materials, 
+                          Indeed, if you take a foreach(mat in meshRenderer.materials), nothing 
+                          will change, the component of meshRenderer.materials are not references
+                          therefore you must change the whole array once. 
+                          https://answers.unity.com/questions/124794/how-to-replace-materials-in-the-materials-array.html*/
+                        
+                        //TODO could be optimize by using an attributes
+                        Material[] mats = new Material[meshRenderer.materials.Length];
+                        for(int i=0; i < meshRenderer.materials.Length; i++)
+                            mats[i] = GameManager.Instance.MatBuildingCreationAvailable;
+                        
+                        meshRenderer.materials = mats;
+                    }
                     else
                         Debug.LogWarning("Unable to find the material component of " + UIManager.Instance.BuildingCreated.name);
                 }
@@ -329,7 +368,14 @@ public class UIManager : MonoBehaviour
                 {
                     GameManager.Instance.CurrentPlayer.ConstructionIsAvailable = false;
                     if (UIManager.Instance.BuildingCreated.TryGetComponent(out MeshRenderer meshRenderer))
-                        meshRenderer.material = GameManager.Instance.MatBuildingCreationNotAvailable;
+                    {
+                        //TODO could be optimize by using an attributes
+                        Material[] mats = new Material[meshRenderer.materials.Length];
+                        for (int i = 0; i < meshRenderer.materials.Length; i++)
+                            mats[i] = GameManager.Instance.MatBuildingCreationNotAvailable;
+
+                        meshRenderer.materials = mats;
+                    }
                     else
                         Debug.LogWarning("Unable to find the material component of " + UIManager.Instance.BuildingCreated.name);
                 }

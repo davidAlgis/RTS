@@ -18,6 +18,7 @@ public class SBuilding : SUnmovable
     private float m_stateOfConstruction = 0.0f;
     private uint m_indexOfConstructionMesh = 0;
     private Material m_initMaterial;
+    private Material[] m_initMaterials;
     private uint m_builderOnConstruction = 0;
     private Text m_percentageConstruction;
 
@@ -27,13 +28,17 @@ public class SBuilding : SUnmovable
     public float StateOfConstruction { get => m_stateOfConstruction; set => m_stateOfConstruction = value; }
     public uint IndexOfConstructionMesh { get => m_indexOfConstructionMesh; set => m_indexOfConstructionMesh = value; }
     public uint BuilderOnConstruction { get => m_builderOnConstruction; set => m_builderOnConstruction = value; }
+    public Material[] InitMaterials { get => m_initMaterials; set => m_initMaterials = value; }
 
     protected override void Awake()
     {
         base.Awake();
         
         if (TryGetComponent(out MeshRenderer meshRenderer))
+        {
+            m_initMaterials = meshRenderer.materials;
             m_initMaterial = meshRenderer.material;
+        }
         else
             Debug.LogWarning("Unable to find the material component of " + gameObject.name);
 

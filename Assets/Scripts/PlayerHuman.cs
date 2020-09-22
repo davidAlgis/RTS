@@ -285,7 +285,9 @@ public class PlayerHuman : Player
     {
         if (m_currentSelection != null)
         {
-            m_currentSquad.DirectionIsSet = false;
+            if(m_currentSquad != null)
+                m_currentSquad.DirectionIsSet = false;
+
             foreach (SObject sobject in m_currentSelection)
                 if (sobject.BelongsTo == this)
                 {

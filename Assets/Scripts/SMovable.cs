@@ -77,6 +77,7 @@ public class SMovable : SObject
             changeInteractionTo(null);
             Agent.destination = dest;
             moveToSquadFloor(dest);
+            UIManager.Instance.plotArrowAt(dest);
         }
         else if(rayHit.collider.gameObject.layer == LayerMask.NameToLayer("Selectable"))
         {
