@@ -135,53 +135,27 @@ public class SWorkers : SUnit
     #endregion
 
     #region buildingCreation
-    public void clickOnConstruction(RaycastHit rayHit)
-    {
-        if (rayHit.collider.gameObject.layer == LayerMask.NameToLayer("Selectable"))
-        {
-            SObject sobject = SObject.getSobjectFromSelectionField(rayHit.collider.gameObject);
 
-            if (sobject is SBuilding)
-            {
-                SBuilding sbuilding = (SBuilding)sobject;
-                if (sbuilding.BelongsTo != m_belongsTo)
-                {
-
-                    print("gonna to attack " + ID);
-                    //TODO add attack here
-                }
-                else
-                {
-                    //if the building is in construction we continue the construction
-                    if (sbuilding.IsInConstruction)
-                        continueConstructBuilding(sbuilding.gameObject);
-                }
-            }
-
-        }
-
-    }
-
-    public void beginCreateBuilding()//GameObject buildingGO)
+    //called when the player click on the button of a workers to make a building
+    public void beginCreateBuilding()
     {
 
         GameObject buildingGO = m_currentButtonCreation.go;
-        if (m_belongsTo is PlayerHuman)
-        {
-            PlayerHuman p = (PlayerHuman)m_belongsTo;
-            p.BeginCreation = buildingGO;
-        }
 
         SBuilding sbuilding;
         if (buildingGO.TryGetComponent(out sbuilding) == false)
         {
-            Debug.LogWarning("The harvester try to create something which is not a building");
+            Debug.LogWarning("The worker " + ID + " try to create something which is not a building");
             return;
         }
 
+        if (m_belongsTo is PlayerHuman == false)
+        {
+            Debug.LogWarning("Unable to begin construction on a player non human with worker " + ID);
+            return;
+        }
 
-
-        sbuilding.BelongsTo = GameManager.Instance.CurrentPlayer;
+        sbuilding.BelongsTo = m_belongsTo;
 
         if (m_belongsTo.canBuySobject(sbuilding) == false)
             return;
@@ -192,26 +166,15 @@ public class SWorkers : SUnit
         RaycastHit rayHit;
         if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out rayHit, Mathf.Infinity, mask))
         {
-            UIManager.Instance.SbuildingCreated = sbuilding;
-            sbuilding.IsInConstruction = true;
-            //when we change this value, the update function of UIManager and the update of PlayerHuman handle the rest.
-            UIManager.Instance.BuildingCreated = (GameObject)Instantiate(buildingGO, rayHit.point, Quaternion.identity);
-
-
-            print(UIManager.Instance.BuildingCreated.name);
-            //define the usual material of construction
-            if (UIManager.Instance.BuildingCreated.TryGetComponent(out MeshRenderer meshRenderer))
-                meshRenderer.material = GameManager.Instance.MatBuildingCreationAvailable;
-            else
-                Debug.LogWarning("Unable to find the material component of " + UIManager.Instance.BuildingCreated.name);
-
-            if (UIManager.Instance.BuildingCreated.TryGetComponent(out Rigidbody rb))
-                rb.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotation;
-
+            /* !!! When we call this function, the update function
+             * PlayerHuman handle the rest. */
+            ((PlayerHuman)m_belongsTo).initConstructionBuilding(buildingGO, rayHit.point);
         }
-
+        else
+            Debug.LogWarning("Try to create a building outside of the map.");
     }
 
+    //called when the player validate the position of construction 
     public void beginConstructBuilding(GameObject buildingGO)
     {
         StopAllCoroutines();
@@ -247,15 +210,6 @@ public class SWorkers : SUnit
         }
 
         //we construct the building for the whole squad
-        m_belongsToSquad.constructBuilding(buildingGO);
-    }
-
-    public void continueConstructBuilding(GameObject buildingGO)
-    {
-        Vector3 dest = buildingGO.transform.position;
-        if (buildingGO.TryGetComponent(out SBuilding sbuilding))
-            moveToSquadSobject(sbuilding);
-        
         m_belongsToSquad.constructBuilding(buildingGO);
     }
 
@@ -326,6 +280,41 @@ public class SWorkers : SUnit
         #endregion
     }
 
+    private void clickOnConstruction(RaycastHit rayHit)
+    {
+        if (rayHit.collider.gameObject.layer == LayerMask.NameToLayer("Selectable"))
+        {
+            SObject sobject = SObject.getSobjectFromSelectionField(rayHit.collider.gameObject);
+
+            if (sobject is SBuilding)
+            {
+                SBuilding sbuilding = (SBuilding)sobject;
+                if (sbuilding.BelongsTo != m_belongsTo)
+                {
+
+                    print("gonna to attack " + ID);
+                    //TODO add attack here
+                }
+                else
+                {
+                    //if the building is in construction we continue the construction
+                    if (sbuilding.IsInConstruction)
+                        continueConstructBuilding(sbuilding.gameObject);
+                }
+            }
+
+        }
+
+    }
+
+    public void continueConstructBuilding(GameObject buildingGO)
+    {
+        Vector3 dest = buildingGO.transform.position;
+        if (buildingGO.TryGetComponent(out SBuilding sbuilding))
+            moveToSquadSobject(sbuilding);
+
+        m_belongsToSquad.constructBuilding(buildingGO);
+    }
     #endregion
 
 

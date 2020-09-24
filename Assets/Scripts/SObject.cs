@@ -137,6 +137,7 @@ public class SObject : MonoBehaviour
         float x;
 
         m_pointsDestionationNavMesh.Clear();
+
         switch (m_fieldType)
         {
             case FieldSelection.circle:
@@ -183,7 +184,6 @@ public class SObject : MonoBehaviour
                     Vector3 pos = new Vector3(transform.position.x - length / 2.0f + x, 0.01f, transform.position.z - length / 2.0f);
                     m_pointsDestionationNavMesh.Add(pos);
                 }
-
 
                 break;
             default:

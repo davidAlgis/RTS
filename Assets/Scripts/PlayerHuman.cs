@@ -6,8 +6,10 @@ using UnityEngine.UIElements;
 
 public class PlayerHuman : Player
 {
-    private GameObject m_beginCreation = null;
+    private GameObject m_buildingInCreationGO = null;
+    private SBuilding m_sbuildingInCreation;
     private bool m_constructionIsAvailable = true;
+
     private Squad m_currentSquad;
     private List<SObject> m_currentSelection = new List<SObject>();
     private SObject m_lastSelection;
@@ -23,11 +25,8 @@ public class PlayerHuman : Player
     #endregion
 
 
-    #region getter
+    #region getter_setter
     public bool MouseIsHold { get => m_mouseIsHold; set => m_mouseIsHold = value; }
-    public GameObject BeginCreation { get => m_beginCreation; set => m_beginCreation = value; }
-    public bool EnableSelection { get => m_enableSelection; set => m_enableSelection = value; }
-    public bool ConstructionIsAvailable { get => m_constructionIsAvailable; set => m_constructionIsAvailable = value; }
     #endregion
 
     protected override void Awake()
@@ -71,26 +70,12 @@ public class PlayerHuman : Player
 
             }
         }
-            
 
-        if (m_beginCreation != null)
+        //When this member variables is set from initConstructionBuilding we called this function
+        if (m_buildingInCreationGO != null)
         {
-            if (Input.GetMouseButton(0) && m_constructionIsAvailable)
-            {
-                /*this line must be before the next one, indeed if we call constructBuilding() 
-                 * it will try to reach the destinationPoints which are set to 0 without this line*/
-                if (UIManager.Instance.BuildingCreated.TryGetComponent(out SObject sobject))
-                    sobject.definePointsDestination();
-
-                //TODO : change the 0 index for m_currentSelection
-                if (m_currentSelection != null)
-                    if (m_currentSelection[0].TryGetComponent(out SWorkers sworkers))
-                        sworkers.beginConstructBuilding(UIManager.Instance.BuildingCreated);
-
-                UIManager.Instance.BuildingCreated = null;
-                m_beginCreation = null;
-                //m_enableSelection = true;
-            }
+            plotBuildingOnMouse();
+            beginConstruction();
         }
 
     }
@@ -100,7 +85,7 @@ public class PlayerHuman : Player
     private bool selectIsEnable()
     {
 
-        if (m_beginCreation != null)
+        if (m_buildingInCreationGO != null)
             return false;
         if (UIManager.Instance.IsPointerOverUIElement())
             return false;
@@ -281,11 +266,92 @@ public class PlayerHuman : Player
     }
 
     #endregion
+
+
+    #region construction_tool
+    public void initConstructionBuilding(GameObject buildingGO, Vector3 initPosition)
+    {
+        m_buildingInCreationGO = (GameObject)Instantiate(buildingGO, initPosition, Quaternion.identity); ;
+
+        //it's not necessary to make any check, because they were made before in beginCreateBuilding()
+        m_sbuildingInCreation = m_buildingInCreationGO.GetComponent<SBuilding>();
+        m_sbuildingInCreation.IsInConstruction = true;
+        if (m_buildingInCreationGO.TryGetComponent(out Rigidbody rb))
+            rb.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotation;
+
+    }
+
+    private void plotBuildingOnMouse()
+    {
+        LayerMask mask = LayerMask.GetMask("Floor");
+        RaycastHit rayHit;
+        if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out rayHit, Mathf.Infinity, mask))
+        {
+            Vector3 point = rayHit.point;
+            //Is the construction possible ?
+            if (Utilities.isPositionAvailable2(m_buildingInCreationGO, point, m_sbuildingInCreation.Radius * 0.5f))
+            {
+                m_constructionIsAvailable = true;
+                if (m_buildingInCreationGO.TryGetComponent(out MeshRenderer meshRenderer))
+                {
+                    /*Here you have to create an array to define meshRenderer.materials, 
+                      Indeed, if you take a foreach(mat in meshRenderer.materials), nothing 
+                      will change, the component of meshRenderer.materials are not references
+                      therefore you must change the whole array once. 
+                      https://answers.unity.com/questions/124794/how-to-replace-materials-in-the-materials-array.html*/
+
+                    //TODO could be optimize by using an attributes
+                    Material[] mats = new Material[meshRenderer.materials.Length];
+                    for (int i = 0; i < meshRenderer.materials.Length; i++)
+                        mats[i] = GameManager.Instance.MatBuildingCreationAvailable;
+
+                    meshRenderer.materials = mats;
+                }
+                else
+                    Debug.LogWarning("Unable to find the material component of " + m_sbuildingInCreation.ID);
+            }
+            else
+            {
+                m_constructionIsAvailable = false;
+                if (m_buildingInCreationGO.TryGetComponent(out MeshRenderer meshRenderer))
+                {
+                    //TODO could be optimize by using an attributes
+                    Material[] mats = new Material[meshRenderer.materials.Length];
+                    for (int i = 0; i < meshRenderer.materials.Length; i++)
+                        mats[i] = GameManager.Instance.MatBuildingCreationNotAvailable;
+
+                    meshRenderer.materials = mats;
+                }
+                else
+                    Debug.LogWarning("Unable to find the material component of " + m_sbuildingInCreation.ID);
+            }
+
+            m_buildingInCreationGO.transform.position = new Vector3(point.x, m_buildingInCreationGO.transform.position.y, point.z);
+        }
+    }
+
+    private void beginConstruction()
+    {
+        if (Input.GetMouseButton(0) && m_constructionIsAvailable)
+        {
+            /*this line must be before the next one, indeed if we call constructBuilding() 
+             * it will try to reach the destinationPoints which are set to 0 without this line*/
+            m_sbuildingInCreation.definePointsDestination();
+            //TODO : change the 0 index for m_currentSelection
+            if (m_currentSelection != null)
+                if (m_currentSelection[0].TryGetComponent(out SWorkers sworkers))
+                    sworkers.beginConstructBuilding(m_buildingInCreationGO); //UIManager.Instance.BuildingCreated);
+
+            m_buildingInCreationGO = null;
+        }
+    }
+    #endregion
+
     private void actionCurrentSelection(RaycastHit rayHit)
     {
         if (m_currentSelection != null)
         {
-            if(m_currentSquad != null)
+            if (m_currentSquad != null)
                 m_currentSquad.DirectionIsSet = false;
 
             foreach (SObject sobject in m_currentSelection)
@@ -293,13 +359,13 @@ public class PlayerHuman : Player
                 {
                     sobject.onClick(rayHit);
                 }
-        }             
+        }
     }
 
     public void removeFromCurrentSquad(SMovable smovable)
     {
-        if(m_currentSquad.SquadSMovable.Contains(smovable))
+        if (m_currentSquad.SquadSMovable.Contains(smovable))
             m_currentSquad.SquadSMovable.Remove(smovable);
-        
+
     }
 }

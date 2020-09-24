@@ -15,8 +15,6 @@ public class UIManager : MonoBehaviour
     private Image[] m_creationButtonsImage = new Image[18];
     private GameObject m_queueButtonsPanel;
     private List<GameObject> m_creationQueueGO = new List<GameObject>();
-    private GameObject m_buildingCreated = null;
-    private SBuilding m_sbuildingCreated;
     private GameObject m_defaultLineRendererGO;
     [SerializeField]
     private RawImage m_selectionImage;
@@ -40,10 +38,7 @@ public class UIManager : MonoBehaviour
             return m_instance;
         }
     }
-
-    public GameObject BuildingCreated { get => m_buildingCreated; set => m_buildingCreated = value; }
     public GameObject DefaultLineRendererGO { get => m_defaultLineRendererGO; set => m_defaultLineRendererGO = value; }
-    public SBuilding SbuildingCreated { get => m_sbuildingCreated; set => m_sbuildingCreated = value; }
     public Animator[] ArrowAnimator { get => m_arrowAnimator; set => m_arrowAnimator = value; }
 
     private void Awake()
@@ -127,9 +122,6 @@ public class UIManager : MonoBehaviour
 
         m_arrowGO.transform.position = new Vector3(pos.x, 1.5f, pos.z);
     }
-
-
-
 
     public void plotSelector(Vector3 extremity1, Vector3 extremity2)
     {
@@ -329,62 +321,6 @@ public class UIManager : MonoBehaviour
     public void Update()
     {
         updateRessourcesCount(GameManager.Instance.CurrentPlayer);
-
-
-        #region construction 
-        if (m_buildingCreated != null)
-        {
-            LayerMask mask = LayerMask.GetMask("Floor");
-            LayerMask maskSelectable = LayerMask.GetMask("Selectable");
-
-            RaycastHit rayHit;
-            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out rayHit, Mathf.Infinity, mask))
-            {
-
-                Vector3 point = rayHit.point;
-                //Is the construction possible ?
-                if (Utilities.isPositionAvailable2(m_buildingCreated, point, m_sbuildingCreated.Radius*0.5f))
-                {
-                    GameManager.Instance.CurrentPlayer.ConstructionIsAvailable = true;
-                    if (UIManager.Instance.BuildingCreated.TryGetComponent(out MeshRenderer meshRenderer))
-                    {
-                        /*Here you have to create an array to define meshRenderer.materials, 
-                          Indeed, if you take a foreach(mat in meshRenderer.materials), nothing 
-                          will change, the component of meshRenderer.materials are not references
-                          therefore you must change the whole array once. 
-                          https://answers.unity.com/questions/124794/how-to-replace-materials-in-the-materials-array.html*/
-                        
-                        //TODO could be optimize by using an attributes
-                        Material[] mats = new Material[meshRenderer.materials.Length];
-                        for(int i=0; i < meshRenderer.materials.Length; i++)
-                            mats[i] = GameManager.Instance.MatBuildingCreationAvailable;
-                        
-                        meshRenderer.materials = mats;
-                    }
-                    else
-                        Debug.LogWarning("Unable to find the material component of " + UIManager.Instance.BuildingCreated.name);
-                }
-                else
-                {
-                    GameManager.Instance.CurrentPlayer.ConstructionIsAvailable = false;
-                    if (UIManager.Instance.BuildingCreated.TryGetComponent(out MeshRenderer meshRenderer))
-                    {
-                        //TODO could be optimize by using an attributes
-                        Material[] mats = new Material[meshRenderer.materials.Length];
-                        for (int i = 0; i < meshRenderer.materials.Length; i++)
-                            mats[i] = GameManager.Instance.MatBuildingCreationNotAvailable;
-
-                        meshRenderer.materials = mats;
-                    }
-                    else
-                        Debug.LogWarning("Unable to find the material component of " + UIManager.Instance.BuildingCreated.name);
-                }
-
-                m_buildingCreated.transform.position = new Vector3(point.x, m_buildingCreated.transform.position.y, point.z) ;
-            }
-            
-        }
-        #endregion
 
         #region IDPanel
 
