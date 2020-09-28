@@ -191,6 +191,7 @@ public class SWorkers : SUnit
         Vector3 dest = buildingGO.transform.position;
         if (buildingGO.TryGetComponent(out SBuilding sbuilding))
         {
+            sbuilding.defineSelectionField();
             //reset the material
             if (buildingGO.TryGetComponent(out MeshRenderer meshRenderer))
             {

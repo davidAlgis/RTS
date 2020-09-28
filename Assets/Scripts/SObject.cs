@@ -38,9 +38,8 @@ public class SObject : MonoBehaviour
     private float m_durationCreation = 0.0f;
     [SerializeField]
     private Resources m_costResources = new Resources();
-    [SerializeField]
     protected List<SObject> m_sobjectsInteracting = new List<SObject>();
-    [SerializeField]
+
     protected SObject m_interactWith;
 
     #region getter-setter
@@ -202,6 +201,11 @@ public class SObject : MonoBehaviour
             Debug.LogWarning("Unable to instantiate UIManager.Instance.DefaultLineRendererGO in " + gameObject.name);
             return; 
         }
+
+        //If the function was executed before, we clear it
+        if(DebugTool.tryFindGOChildren(gameObject, gameObject.name + "SelectionField", out GameObject tempGO, LogType.Log))
+            Destroy(tempGO);
+        
 
         GameObject selectionFieldGO = (GameObject)Instantiate(UIManager.Instance.DefaultLineRendererGO);
         //selectionFieldGO.transform.position = Vector3.zero;
@@ -451,7 +455,6 @@ public enum FieldSelection
 public struct CreationImprovement
 {
     public Sprite spriteButton;
-    public SObject sobject;
     //the methods used here can only have less than 2 parameters.
     public UnityEvent method;
     public GameObject go;

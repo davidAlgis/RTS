@@ -57,9 +57,16 @@ public class SBuilding : SUnmovable
 
     public void addToQueue(CreationImprovement buttonImage)
     {
-
-        if (m_belongsTo.canBuySobject(buttonImage.sobject) == false)
+        if (buttonImage.go.TryGetComponent(out SObject sobject))
+        {
+            if (m_belongsTo.canBuySobject(sobject) == false)
+                return;
+        }
+        else
+        {
+            Debug.LogWarning("Unable to find any sobject component in " + buttonImage.go.name);
             return;
+        }
 
         m_queueCreation.Enqueue(buttonImage);
         UIManager.Instance.addQueueButton(buttonImage);
@@ -73,15 +80,19 @@ public class SBuilding : SUnmovable
         UIManager.Instance.dequeueButton(0);
     }
 
-    public void createUnit(GameObject sunitGO)
+    public void createUnit()
     {
+        GameObject sunitGO = m_currentButtonCreation.go;
 
         if (sunitGO.TryGetComponent(out SUnit sunit) == false)
         {
             Debug.LogError("Building try to create something else than a sunit");
             return;
         }
-        
+
+        if (m_belongsTo.canBuySobject(sunit) == false)
+            return;
+
         sunit.BelongsTo = GameManager.Instance.CurrentPlayer;
 
         Vector3 spawn = lookForASpawnPoint(sunit);
@@ -115,7 +126,8 @@ public class SBuilding : SUnmovable
         m_creationOnGoing = true;
         while (m_queueCreation.Count > 0)
         {
-            yield return new WaitForSeconds(m_queueCreation.Peek().sobject.DurationCreation);
+            SObject sobject = m_queueCreation.Peek().go.GetComponent<SObject>();
+            yield return new WaitForSeconds(sobject.DurationCreation);
             m_queueCreation.Peek().method.Invoke();
             dequeue();
         }

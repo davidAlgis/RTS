@@ -336,7 +336,7 @@ public class PlayerHuman : Player
         {
             /*this line must be before the next one, indeed if we call constructBuilding() 
              * it will try to reach the destinationPoints which are set to 0 without this line*/
-            m_sbuildingInCreation.definePointsDestination();
+            m_buildingInCreationGO.GetComponent<SBuilding>().definePointsDestination();
             //TODO : change the 0 index for m_currentSelection
             if (m_currentSelection != null)
                 if (m_currentSelection[0].TryGetComponent(out SWorkers sworkers))

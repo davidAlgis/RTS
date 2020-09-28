@@ -161,6 +161,7 @@ public class UIManager : MonoBehaviour
                 {
                     button.onClick.RemoveAllListeners();
 
+                    button.onClick.AddListener(() => sobject.setCurrentButtonCreation(creationButton));
                     if (sobject is SBuilding)
                     {
                         SBuilding sbuilding = (SBuilding)sobject;
@@ -168,7 +169,6 @@ public class UIManager : MonoBehaviour
                     }
                     else if(sobject is SWorkers)
                     {
-                        button.onClick.AddListener(() => sobject.setCurrentButtonCreation(creationButton));
                         button.onClick.AddListener(() => creationButton.method?.Invoke());
                     }
                     else
